@@ -1,10 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import (
-    CategoryViewSet, BrandViewSet, TagViewSet, ProductViewSet, ProductPriceViewSet, InventoryViewSet,
-    OrderViewSet, OrderItemViewSet, PaymentViewSet, CustomerViewSet, AddressViewSet,
-    ProductReviewViewSet, WishlistViewSet, RoleViewSet, StaffViewSet
-)
+from .viewsets.user.viewsets import CustomerViewSet, AddressViewSet, RoleViewSet, StaffViewSet
+from .viewsets.order.viewsets import OrderViewSet, OrderItemViewSet, PaymentViewSet
+from .viewsets.inventory.viewsets import InventoryViewSet
+from .viewsets.product.viewsets import CategoryViewSet, BrandViewSet, TagViewSet, ProductViewSet, ProductPriceViewSet, \
+    ProductReviewViewSet, WishlistViewSet
 
 router = DefaultRouter()
 router.register(r'categories', CategoryViewSet, basename='category')
@@ -24,5 +24,5 @@ router.register(r'roles', RoleViewSet, basename='role')
 router.register(r'staff', StaffViewSet, basename='staff')
 
 urlpatterns = [
-    path('v1/api/', include(router.urls)),
+    path('v1/ecommerce/', include(router.urls)),
 ]

@@ -9,12 +9,11 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import logging
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -27,9 +26,28 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# At the bottom of your settings.py file (after INSTALLED_APPS, etc.)
+# DJ_REST_AUTH = {
+#     'USE_JWT': True,
+#     'TOKEN_MODEL': None,  # This disables the default Token model.
+#     'TOKEN_SERIALIZER': 'dj_rest_auth.serializers.JWTSerializer',
+#     # (Optional) Other JWT settings, e.g.,
+#     # 'JWT_AUTH_COOKIE': 'access',
+#     # 'JWT_AUTH_REFRESH_COOKIE': 'refresh',
+# }
+
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_COOKIE': 'jwt-auth',
+}
+
+REST_AUTH_REGISTER_SERIALIZERS = {
+    'REGISTER_SERIALIZER': 'ecommerce.serializers.user.serializers.CustomRegisterSerializer',
+}
+
+ACCOUNT_ADAPTER = "ecommerce.serializers.user.serializers.CustomAccountAdapter"
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,16 +55,28 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
     'rest_framework',
-    'ecommerce'
+    'rest_framework.authtoken',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+
+    'ecommerce',
+    'api',
+
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -71,7 +101,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -81,7 +110,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -101,7 +129,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -113,7 +140,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
@@ -123,3 +149,59 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+
+        'rest_framework_simplejwt.authentication.JWTAuthentication']
+}
+
+CORS_ORIGIN_WHITELIST = ['http://family-spending.local', 'http://localhost:3000']
+CORS_ALLOW_CREDENTIALS = True
+
+# Email Backend (Use Console for Testing)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Change this later for production
+
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    'allauth.account.auth_backends.AuthenticationBackend',  # If using django-allauth
+    'django.contrib.auth.backends.ModelBackend',  # Default Django auth
+]
+
+# Allauth Configuration
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Require email confirmation
+# ACCOUNT_AUTHENTICATION_METHOD = 'email' # deprecated
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False  # Optional, can register with email only
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',  # Use the 'simple' formatter for console output
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'django_debug.log',  # Specify the name of the log file
+            'formatter': 'verbose',  # Use the 'verbose' formatter for file output
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],  # Log to both console and file
+        'level': 'DEBUG',  # Set the root logger level to DEBUG to log all messages
+    },
+}

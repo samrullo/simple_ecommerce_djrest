@@ -1,18 +1,22 @@
 from django.contrib import admin
+
 from .models import (
     Category, Brand, Tag, Product, ProductPrice, Inventory, Order, OrderItem,
     Payment, Customer, Address, ProductReview, Wishlist, Role, Staff
 )
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'description']
     search_fields = ['name']
 
+
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
     list_display = ['name', 'description']
     search_fields = ['name']
+
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
@@ -41,10 +45,12 @@ class ProductPriceAdmin(admin.ModelAdmin):
     list_display = ['product', 'price', 'discount_price', 'currency']
     search_fields = ['product__name']
 
+
 @admin.register(Inventory)
 class InventoryAdmin(admin.ModelAdmin):
     list_display = ['product', 'stock']
     search_fields = ['product__name']
+
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -52,10 +58,12 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ['customer__user__username', 'id']
     list_filter = ['status', 'created_at']
 
+
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
     list_display = ['order', 'product', 'quantity', 'price']
     search_fields = ['order__id', 'product__name']
+
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
@@ -63,10 +71,12 @@ class PaymentAdmin(admin.ModelAdmin):
     search_fields = ['order__id', 'transaction_id']
     list_filter = ['method', 'status']
 
+
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ['user', 'phone']
     search_fields = ['user__username', 'phone']
+
 
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
@@ -74,21 +84,25 @@ class AddressAdmin(admin.ModelAdmin):
     search_fields = ['customer__user__username', 'street', 'city', 'state']
     list_filter = ['is_default', 'country']
 
+
 @admin.register(ProductReview)
 class ProductReviewAdmin(admin.ModelAdmin):
     list_display = ['product', 'customer', 'rating', 'created_at']
     search_fields = ['product__name', 'customer__user__username']
     list_filter = ['rating', 'created_at']
 
+
 @admin.register(Wishlist)
 class WishlistAdmin(admin.ModelAdmin):
     list_display = ['customer', 'product', 'added_at']
     search_fields = ['customer__user__username', 'product__name']
 
+
 @admin.register(Role)
 class RoleAdmin(admin.ModelAdmin):
     list_display = ['name', 'description']
     search_fields = ['name']
+
 
 @admin.register(Staff)
 class StaffAdmin(admin.ModelAdmin):
