@@ -17,13 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from api.views import CustomJWTLoginView
-from ecommerce.viewsets.user.viewsets import CustomVerifyEmailView, CustomRegisterView
+from ecommerce.viewsets.user.viewsets import CustomVerifyEmailView, CustomRegisterView,CustomLoginView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('ecommerce/', include('ecommerce.urls')),
     path('api/', include('api.urls')),
-    # path('auth/login/', CustomJWTLoginView.as_view(), name="rest_login"),
+    path('auth/login/', CustomLoginView.as_view(), name="rest_login"),
     path('auth/', include('dj_rest_auth.urls')),  # Login, Logout, Password Reset
     path('auth/registration/account-confirm-email/<str:key>/', CustomVerifyEmailView.as_view(),
          name="account_confirm_email"),

@@ -47,6 +47,10 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 
 ACCOUNT_ADAPTER = "ecommerce.serializers.user.serializers.CustomAccountAdapter"
 
+REST_AUTH_USER_DETAILS_SERIALIZER = 'ecommerce.serializers.user.serializers.CustomUserSerializer'
+REST_AUTH_SERIALIZERS = {
+    'LOGIN_SERIALIZER': 'ecommerce.serializers.user.serializers.CustomLoginSerializer',
+}
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',

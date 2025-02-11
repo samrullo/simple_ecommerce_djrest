@@ -6,35 +6,36 @@ from django.contrib.auth import get_user_model
 from allauth.account.adapter import DefaultAccountAdapter
 
 logger = logging.getLogger(__name__)
-logger.debug("Loading CustomRegisterSerializer module")
-
-
-class CustomerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Customer
-        fields = ['phone']  # Exclude the user field from client input
-
-    def create(self, validated_data):
-        # Retrieve the user from the context.
-        user = self.context.get('user')
-        if not user:
-            raise serializers.ValidationError("User must be provided in the serializer context.")
-        # Create and return the Customer instance.
-        return Customer.objects.create(user=user, **validated_data)
 
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = ['street', 'city', 'state', 'zip_code', 'country', 'is_default']
+        fields = ['id', 'street', 'city', 'state', 'zip_code', 'country', 'is_default']
 
-    def create(self, validated_data):
-        # Get the customer object from the serializer context.
-        customer = self.context.get('customer')
-        if not customer:
-            raise serializers.ValidationError("Customer must be provided in the serializer context.")
-        # Create and return the Address instance linked to the provided customer.
-        return Address.objects.create(customer=customer, **validated_data)
+
+class CustomerSerializer(serializers.ModelSerializer):
+    # Assuming Customer has a reverse relationship to Address via address_set.
+    addresses = AddressSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Customer
+        fields = ['id', 'phone', 'addresses']  # Add any additional fields from Customer
+
+
+class CustomUserSerializer(serializers.ModelSerializer):
+    customer = serializers.SerializerMethodField()
+
+    def get_customer(self, obj):
+        try:
+            customer_obj = obj.customer  # should work if a Customer exists
+            return CustomerSerializer(customer_obj).data
+        except Exception as e:
+            return None
+
+    class Meta:
+        model = get_user_model()
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'customer']
 
 
 class RoleSerializer(serializers.ModelSerializer):
@@ -70,11 +71,6 @@ class CustomRegisterSerializer(RegisterSerializer):
         data['address'] = self.validated_data.get('address', {})
         logging.debug(f"data after setting is : {data}")
         return data
-
-
-# ecommerce/adapters.py
-
-from allauth.account.adapter import DefaultAccountAdapter
 
 
 class CustomAccountAdapter(DefaultAccountAdapter):
