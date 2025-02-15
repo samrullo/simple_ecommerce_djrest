@@ -21,6 +21,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-3=ym!*_0lzt(x*dh4-j2b%j5#x1by&)p575(gz8%@47gkziuq*'
 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -164,7 +167,14 @@ CORS_ORIGIN_WHITELIST = ['http://family-spending.local', 'http://localhost:3000'
 CORS_ALLOW_CREDENTIALS = True
 
 # Email Backend (Use Console for Testing)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Change this later for production
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Change this later for production
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'email-smtp.us-east-1.amazonaws.com'  # Check your SES region
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'AKIAVTBHSDP5HFAJMOKV'  # From AWS SES SMTP credentials
+EMAIL_HOST_PASSWORD = 'BHe8b5oB16He1X6Yv5N+KKAnvmdbwkXOLmqgXnfQeELi'  # From AWS SES SMTP credentials
+DEFAULT_FROM_EMAIL = 'amrulloev.subhon@gmail.com'  # Must be a verified email in SES
 
 SITE_ID = 1
 
