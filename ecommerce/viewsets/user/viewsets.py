@@ -1,7 +1,12 @@
 import logging
 from rest_framework import viewsets, permissions
 from ecommerce.models import Customer, Address, Role, Staff
-from ecommerce.serializers import CustomerSerializer, AddressSerializer, RoleSerializer, StaffSerializer
+from ecommerce.serializers import (
+    CustomerSerializer,
+    AddressSerializer,
+    RoleSerializer,
+    StaffSerializer,
+)
 from dj_rest_auth.registration.views import VerifyEmailView
 from rest_framework.response import Response
 from rest_framework import status
@@ -73,7 +78,7 @@ class CustomLoginView(LoginView):
         if self.user:
             logger.debug("Modifying response data with custom user details")
             # Replace the default 'user' key with data from your custom serializer
-            response.data['user'] = CustomUserSerializer(
+            response.data["user"] = CustomUserSerializer(
                 self.user, context=self.get_serializer_context()
             ).data
         else:
@@ -94,7 +99,7 @@ class CustomLoginView(LoginView):
 
         # If a user is authenticated, override the 'user' key with our custom serialized data.
         if self.user:
-            data['user'] = CustomUserSerializer(
+            data["user"] = CustomUserSerializer(
                 self.user, context=self.get_serializer_context()
             ).data
         return data
@@ -105,22 +110,31 @@ class ResendEmailVerificationView(APIView):
         email = request.data.get("email")
 
         if not email:
-            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         # Check if the user's email is already verified
         email_address = EmailAddress.objects.filter(user=user, email=email).first()
         if email_address and email_address.verified:
-            return Response({"error": "Email is already verified"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Email is already verified"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # Resend the verification email
         send_email_confirmation(request, user)
 
-        return Response({"detail": "Verification email has been resent"}, status=status.HTTP_200_OK)
+        return Response(
+            {"detail": "Verification email has been resent"}, status=status.HTTP_200_OK
+        )
 
 
 @api_view(["GET"])

@@ -7,16 +7,19 @@ class Order(models.Model):
     """
     Stores customer orders.
     """
+
     ORDER_STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('processing', 'Processing'),
-        ('shipped', 'Shipped'),
-        ('delivered', 'Delivered'),
-        ('cancelled', 'Cancelled'),
+        ("pending", "Pending"),
+        ("processing", "Processing"),
+        ("shipped", "Shipped"),
+        ("delivered", "Delivered"),
+        ("cancelled", "Cancelled"),
     ]
 
-    customer = models.ForeignKey('Customer', on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='pending')
+    customer = models.ForeignKey("Customer", on_delete=models.CASCADE)
+    status = models.CharField(
+        max_length=20, choices=ORDER_STATUS_CHOICES, default="pending"
+    )
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -30,6 +33,7 @@ class OrderItem(models.Model):
     """
     Links products with orders.
     """
+
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
@@ -43,10 +47,11 @@ class Payment(models.Model):
     """
     Handles payment transactions.
     """
+
     PAYMENT_METHOD_CHOICES = [
-        ('credit_card', 'Credit Card'),
-        ('paypal', 'PayPal'),
-        ('cash_on_delivery', 'Cash on Delivery'),
+        ("credit_card", "Credit Card"),
+        ("paypal", "PayPal"),
+        ("cash_on_delivery", "Cash on Delivery"),
     ]
 
     order = models.OneToOneField(Order, on_delete=models.CASCADE)

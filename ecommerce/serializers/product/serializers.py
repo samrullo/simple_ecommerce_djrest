@@ -1,25 +1,33 @@
 from rest_framework import serializers
 
-from ecommerce.models import Category, Brand, Tag, Product, ProductPrice, ProductReview, Wishlist
+from ecommerce.models import (
+    Category,
+    Brand,
+    Tag,
+    Product,
+    ProductPrice,
+    ProductReview,
+    Wishlist,
+)
 from ecommerce.serializers.user.serializers import CustomerSerializer
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = "__all__"
 
 
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = '__all__'
+        fields = "__all__"
 
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -30,7 +38,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ProductPriceSerializer(serializers.ModelSerializer):
@@ -39,7 +47,7 @@ class ProductPriceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductPrice
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ProductReviewSerializer(serializers.ModelSerializer):
@@ -48,7 +56,7 @@ class ProductReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductReview
-        fields = '__all__'
+        fields = "__all__"
 
 
 class WishlistSerializer(serializers.ModelSerializer):
@@ -57,4 +65,4 @@ class WishlistSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Wishlist
-        fields = '__all__'
+        fields = "__all__"

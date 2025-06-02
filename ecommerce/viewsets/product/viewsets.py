@@ -1,8 +1,23 @@
 from rest_framework import viewsets, permissions
 
-from ecommerce.models import Category, Brand, Tag, Product, ProductPrice, ProductReview, Wishlist
-from ecommerce.serializers import CategorySerializer, BrandSerializer, TagSerializer, ProductSerializer, \
-    ProductPriceSerializer, ProductReviewSerializer, WishlistSerializer
+from ecommerce.models import (
+    Category,
+    Brand,
+    Tag,
+    Product,
+    ProductPrice,
+    ProductReview,
+    Wishlist,
+)
+from ecommerce.serializers import (
+    CategorySerializer,
+    BrandSerializer,
+    TagSerializer,
+    ProductSerializer,
+    ProductPriceSerializer,
+    ProductReviewSerializer,
+    WishlistSerializer,
+)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

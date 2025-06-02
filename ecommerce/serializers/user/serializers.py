@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = ['id', 'street', 'city', 'state', 'zip_code', 'country', 'is_default']
+        fields = ["id", "street", "city", "state", "zip_code", "country", "is_default"]
 
 
 class CustomerSerializer(serializers.ModelSerializer):
@@ -20,7 +20,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ['id', 'phone', 'addresses']  # Add any additional fields from Customer
+        fields = ["id", "phone", "addresses"]  # Add any additional fields from Customer
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -35,13 +35,13 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'customer']
+        fields = ["id", "username", "email", "first_name", "last_name", "customer"]
 
 
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Role
-        fields = '__all__'
+        fields = "__all__"
 
 
 class StaffSerializer(serializers.ModelSerializer):
@@ -51,7 +51,7 @@ class StaffSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Staff
-        fields = '__all__'
+        fields = "__all__"
 
 
 class CustomRegisterSerializer(RegisterSerializer):
@@ -64,11 +64,11 @@ class CustomRegisterSerializer(RegisterSerializer):
         data = super().get_cleaned_data()
         logger.debug(f"cleaned data is : {data}")
         logger.debug(f"validated_data is : {self.validated_data}")
-        data['first_name'] = self.validated_data.get('first_name', '')
-        data['last_name'] = self.validated_data.get('last_name', '')
+        data["first_name"] = self.validated_data.get("first_name", "")
+        data["last_name"] = self.validated_data.get("last_name", "")
         # Include the nested dictionaries for customer and address:
-        data['customer'] = self.validated_data.get('customer', {})
-        data['address'] = self.validated_data.get('address', {})
+        data["customer"] = self.validated_data.get("customer", {})
+        data["address"] = self.validated_data.get("address", {})
         logging.debug(f"data after setting is : {data}")
         return data
 

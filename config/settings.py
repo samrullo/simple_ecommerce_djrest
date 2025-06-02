@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
+
 import logging
 from pathlib import Path
 
@@ -19,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-3=ym!*_0lzt(x*dh4-j2b%j5#x1by&)p575(gz8%@47gkziuq*'
+SECRET_KEY = "django-insecure-3=ym!*_0lzt(x*dh4-j2b%j5#x1by&)p575(gz8%@47gkziuq*"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -40,81 +41,81 @@ ALLOWED_HOSTS = []
 # }
 
 REST_AUTH = {
-    'USE_JWT': True,
-    'JWT_AUTH_COOKIE': 'jwt-auth',
+    "USE_JWT": True,
+    "JWT_AUTH_COOKIE": "jwt-auth",
 }
 
 REST_AUTH_REGISTER_SERIALIZERS = {
-    'REGISTER_SERIALIZER': 'ecommerce.serializers.user.serializers.CustomRegisterSerializer',
+    "REGISTER_SERIALIZER": "ecommerce.serializers.user.serializers.CustomRegisterSerializer",
 }
 
 ACCOUNT_ADAPTER = "ecommerce.serializers.user.serializers.CustomAccountAdapter"
 
-REST_AUTH_USER_DETAILS_SERIALIZER = 'ecommerce.serializers.user.serializers.CustomUserSerializer'
+REST_AUTH_USER_DETAILS_SERIALIZER = (
+    "ecommerce.serializers.user.serializers.CustomUserSerializer"
+)
 REST_AUTH_SERIALIZERS = {
-    'LOGIN_SERIALIZER': 'ecommerce.serializers.user.serializers.CustomLoginSerializer',
+    "LOGIN_SERIALIZER": "ecommerce.serializers.user.serializers.CustomLoginSerializer",
 }
 # Application definition
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'rest_framework',
-    'rest_framework.authtoken',
-    'dj_rest_auth',
-    'dj_rest_auth.registration',
-
-    'ecommerce',
-    'api',
-
-    'corsheaders'
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
+    "ecommerce",
+    "api",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'config.urls'
+ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
+WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -123,25 +124,25 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -150,72 +151,74 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-
-        'rest_framework_simplejwt.authentication.JWTAuthentication']
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication"
+    ]
 }
 
-CORS_ORIGIN_WHITELIST = ['http://family-spending.local', 'http://localhost:3000']
+CORS_ORIGIN_WHITELIST = ["http://family-spending.local", "http://localhost:3000"]
 CORS_ALLOW_CREDENTIALS = True
 
 # Email Backend (Use Console for Testing)
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Change this later for production
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'email-smtp.us-east-1.amazonaws.com'  # Check your SES region
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"  # Check your SES region
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'AKIAVTBHSDP5HFAJMOKV'  # From AWS SES SMTP credentials
-EMAIL_HOST_PASSWORD = 'BHe8b5oB16He1X6Yv5N+KKAnvmdbwkXOLmqgXnfQeELi'  # From AWS SES SMTP credentials
-DEFAULT_FROM_EMAIL = 'amrulloev.subhon@gmail.com'  # Must be a verified email in SES
+EMAIL_HOST_USER = "AKIAVTBHSDP5HFAJMOKV"  # From AWS SES SMTP credentials
+EMAIL_HOST_PASSWORD = (
+    "BHe8b5oB16He1X6Yv5N+KKAnvmdbwkXOLmqgXnfQeELi"  # From AWS SES SMTP credentials
+)
+DEFAULT_FROM_EMAIL = "amrulloev.subhon@gmail.com"  # Must be a verified email in SES
 
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = [
-    'allauth.account.auth_backends.AuthenticationBackend',  # If using django-allauth
-    'django.contrib.auth.backends.ModelBackend',  # Default Django auth
+    "allauth.account.auth_backends.AuthenticationBackend",  # If using django-allauth
+    "django.contrib.auth.backends.ModelBackend",  # Default Django auth
 ]
 
 # Allauth Configuration
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Require email confirmation
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # Require email confirmation
 # ACCOUNT_AUTHENTICATION_METHOD = 'email' # deprecated
-ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False  # Optional, can register with email only
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
         },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',  # Use the 'simple' formatter for console output
-        },
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': 'django_debug.log',  # Specify the name of the log file
-            'formatter': 'verbose',  # Use the 'verbose' formatter for file output
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
         },
     },
-    'root': {
-        'handlers': ['console', 'file'],  # Log to both console and file
-        'level': 'DEBUG',  # Set the root logger level to DEBUG to log all messages
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple",  # Use the 'simple' formatter for console output
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": "django_debug.log",  # Specify the name of the log file
+            "formatter": "verbose",  # Use the 'verbose' formatter for file output
+        },
+    },
+    "root": {
+        "handlers": ["console", "file"],  # Log to both console and file
+        "level": "DEBUG",  # Set the root logger level to DEBUG to log all messages
     },
 }

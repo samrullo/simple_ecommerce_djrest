@@ -7,6 +7,7 @@ class Inventory(models.Model):
     """
     Tracks product availability.
     """
+
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     stock = models.PositiveIntegerField()
 

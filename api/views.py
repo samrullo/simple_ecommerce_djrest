@@ -8,8 +8,10 @@ class DummyProductViewset(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = (IsAuthenticated,)
 
     def list(self, request, *args, **kwargs):
-        dummy_products = [DummyProduct("MacBook", "Apple personal computing device", 500000),
-                          DummyProduct("iPhone", "Apple mobile device", 200000)]
+        dummy_products = [
+            DummyProduct("MacBook", "Apple personal computing device", 500000),
+            DummyProduct("iPhone", "Apple mobile device", 200000),
+        ]
         dummy_products_serializer = DummyProductSerializer(dummy_products, many=True)
         return Response({"results": dummy_products_serializer.data})
 
@@ -17,6 +19,7 @@ class DummyProductViewset(mixins.ListModelMixin, viewsets.GenericViewSet):
 from dj_rest_auth.views import LoginView
 from rest_framework_simplejwt.tokens import RefreshToken
 from dj_rest_auth.serializers import UserDetailsSerializer
+
 
 class CustomJWTLoginView(LoginView):
     def get_response_data(self):
@@ -28,7 +31,9 @@ class CustomJWTLoginView(LoginView):
         refresh = RefreshToken.for_user(self.user)
         # Return a dict with the access token, refresh token, and serialized user data.
         return {
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
-            'user': UserDetailsSerializer(self.user, context=self.get_serializer_context()).data
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "user": UserDetailsSerializer(
+                self.user, context=self.get_serializer_context()
+            ).data,
         }
