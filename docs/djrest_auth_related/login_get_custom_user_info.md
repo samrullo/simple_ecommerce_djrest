@@ -80,3 +80,7 @@ and it returns below response
 pZCI6NDJ9.q41PCkAecRJZFWVRE-tTEPCYYSg5tel0UJyx5fmp5Mo","refresh":"","user":{"id":42,"username":"naira","email":"naira@mail.com","first_name":"Naira","last_name":"Amrulloeva","customer":{"
 id":17,"phone":"1234567890","addresses":[{"id":9,"street":"Ushirohirai 170 ban 315 goshitu","city":"Nagareyama","state":"Chiba","zip_code":"270-0151","country":"Japan","is_default":true}]}}}
 ```
+
+# Setting access and refresh tokens with TokenObtainPairSerializer
+
+Refer to this conversation https://chatgpt.com/share/684a7964-3430-8010-b2a9-b4e1b0e3fc65

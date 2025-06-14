@@ -17,6 +17,13 @@ from .viewsets.product.viewsets import (
     ProductReviewViewSet,
     WishlistViewSet,
 )
+from .viewsets.accounting.viewsets import (
+    AccountViewSet,
+    JournalEntryViewSet,
+    JournalEntryLineViewSet,
+)
+from .viewsets.product.viewsets import ProductCreationAPIView,ProductUpdateAPIView
+
 
 router = DefaultRouter()
 router.register(r"categories", CategoryViewSet, basename="category")
@@ -34,7 +41,13 @@ router.register(r"product-reviews", ProductReviewViewSet, basename="product-revi
 router.register(r"wishlists", WishlistViewSet, basename="wishlist")
 router.register(r"roles", RoleViewSet, basename="role")
 router.register(r"staff", StaffViewSet, basename="staff")
+router.register(r"accounts", AccountViewSet)
+router.register(r"journal-entries", JournalEntryViewSet)
+router.register(r"journal-entry-lines", JournalEntryLineViewSet)
+
 
 urlpatterns = [
     path("v1/", include(router.urls)),
+    path("v1/create-product/",ProductCreationAPIView.as_view(),name="create-product"),
+    path("v1/update-product/<int:pk>/",ProductUpdateAPIView.as_view(),name="update-product")
 ]

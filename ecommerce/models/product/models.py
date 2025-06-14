@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils import timezone
 from ecommerce.models.users.models import Customer
 
 
@@ -63,18 +63,29 @@ class Product(models.Model):
 
 class ProductPrice(models.Model):
     """
-    Handles pricing details, including discounts.
+    Handles time-based pricing for a product.
     """
 
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, related_name="price", on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    discount_price = models.DecimalField(
-        max_digits=10, decimal_places=2, blank=True, null=True
-    )
+    discount_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     currency = models.CharField(max_length=10, default="USD")
 
+    begin_date = models.DateField(default=timezone.now)
+    end_date = models.DateField(blank=True, null=True)
+
+    class Meta:
+        ordering = ["-begin_date"]  # latest first
+        constraints = [
+            models.UniqueConstraint(
+                fields=["product"],
+                condition=models.Q(end_date__isnull=True),
+                name="only_one_active_price_per_product"
+            )
+        ]
+
     def __str__(self):
-        return f"{self.product.name} - {self.price} {self.currency}"
+        return f"{self.product.name} - {self.price} {self.currency} ({self.begin_date} to {self.end_date or 'ongoing'})"
 
 
 class ProductReview(models.Model):

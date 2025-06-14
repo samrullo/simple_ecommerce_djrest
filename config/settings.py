@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import logging
 from pathlib import Path
+from datetime import timedelta
+from django.urls import reverse_lazy
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,6 +47,7 @@ REST_AUTH = {
     "JWT_AUTH_COOKIE": "jwt-auth",
 }
 
+
 REST_AUTH_REGISTER_SERIALIZERS = {
     "REGISTER_SERIALIZER": "ecommerce.serializers.user.serializers.CustomRegisterSerializer",
 }
@@ -57,6 +60,25 @@ REST_AUTH_USER_DETAILS_SERIALIZER = (
 REST_AUTH_SERIALIZERS = {
     "LOGIN_SERIALIZER": "ecommerce.serializers.user.serializers.CustomLoginSerializer",
 }
+
+
+# Optional: so emails show http://localhost:3000 instead of backend's domain
+SITE_DOMAIN = "localhost:3000"
+SITE_NAME = "Simple Ecommerce Front"
+
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
+DEFAULT_FROM_EMAIL = "amrulloev.subhon@gmail.com"
+
+# This is used to construct absolute URLs in email
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = "/"
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "/"
+
+# To override password reset url within forgot password email
+DJANGO_REST_AUTH = {
+    "PASSWORD_RESET_CONFIRM_URL": "reset-password-confirm/{uid}/{token}/",
+    "PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND": True,  # optional
+}
+
 # Application definition
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -94,7 +116,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -158,9 +180,21 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+}
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication"
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication"
     ]
 }
 

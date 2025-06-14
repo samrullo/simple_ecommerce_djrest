@@ -35,7 +35,16 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ["id", "username", "email", "first_name", "last_name", "customer"]
+        fields = [
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "is_staff",
+            "is_superuser",
+            "customer",
+        ]
 
 
 class RoleSerializer(serializers.ModelSerializer):

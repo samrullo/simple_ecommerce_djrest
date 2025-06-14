@@ -17,6 +17,7 @@ from django.contrib.auth import get_user_model
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 User = get_user_model()
 
@@ -77,6 +78,10 @@ class CustomLoginView(LoginView):
         # If the login was successful and we have a user, update the response data
         if self.user:
             logger.debug("Modifying response data with custom user details")
+            refresh = TokenObtainPairSerializer.get_token(self.user)
+            access_token=refresh.access_token
+            response.data["refresh"]=str(refresh)
+            response.data["access"]=str(access_token)
             # Replace the default 'user' key with data from your custom serializer
             response.data["user"] = CustomUserSerializer(
                 self.user, context=self.get_serializer_context()
@@ -89,20 +94,26 @@ class CustomLoginView(LoginView):
         logger.debug("CustomLoginView.finalize_response() called")
         return super().finalize_response(request, response, *args, **kwargs)
 
-    def get_response_data(self):
-        """
-        Return a custom response that includes the user details from CustomUserSerializer.
-        """
-        # Get the default response data (e.g., tokens)
-        logger.debug(f"CustomLoginView was called")
-        data = super().get_response_data()
-
-        # If a user is authenticated, override the 'user' key with our custom serialized data.
-        if self.user:
-            data["user"] = CustomUserSerializer(
-                self.user, context=self.get_serializer_context()
-            ).data
-        return data
+    # def get_response_data(self):
+    #     """
+    #     Return a custom response that includes the user details from CustomUserSerializer.
+    #     """
+    #     # Get the default response data (e.g., tokens)
+    #     logger.debug(f"CustomLoginView get_response_data function was called")
+    #     data = super().get_response_data()
+    #
+    #     # If a user is authenticated, override the 'user' key with our custom serialized data.
+    #     if self.user:
+    #         # Generate tokens
+    #         refresh = TokenObtainPairSerializer.get_token(self.user)
+    #         access_token = refresh.access_token
+    #
+    #         data["refresh"] = str(refresh)
+    #         data["access"] = str(access_token)
+    #         data["user"] = CustomUserSerializer(
+    #             self.user, context=self.get_serializer_context()
+    #         ).data
+    #     return data
 
 
 class ResendEmailVerificationView(APIView):
