@@ -199,3 +199,8 @@ A simple ecommerce accounting system can be built around these key models:
 - **JournalEntryLine:** Represents individual debit/credit lines that make up the journal entry.
 
 By mapping your ecommerce events (sales, payments, refunds, etc.) to these accounting records, you can maintain a clear, auditable financial history that aligns with standard accounting practices while keeping your system relatively straightforward.
+
+
+# Inventory changes
+When I increase an inventory of a product directly, it means I bought products, so I need to post purchases transactions and then increment the inventory.
+When I decrease an inventory of a product directly, it means some customer bought the product, so I need to post order by an anonymous customer and then decrement the inventory.

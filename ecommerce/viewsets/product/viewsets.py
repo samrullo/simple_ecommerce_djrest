@@ -123,7 +123,7 @@ class ProductCreationAPIView(APIView):
                 ProductPrice.objects.create(product=product, price=price)
 
                 # Inventory
-                quantity = int(request.data.get("quantity", 1))
+                quantity = int(request.data.get("stock", 1))
                 Inventory.objects.create(product=product, stock=quantity)
 
                 # Accounting
