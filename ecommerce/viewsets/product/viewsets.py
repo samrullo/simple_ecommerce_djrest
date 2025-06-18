@@ -41,6 +41,7 @@ from ecommerce.serializers import (
     WishlistSerializer,
 )
 
+logger = logging.getLogger(__name__)
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -90,7 +91,7 @@ class ProductCreationAPIView(APIView):
 
     def post(self, request):
         try:
-            print(f"Incoming data : {request.data}")
+            logger.debug(f"Incoming data : {request.data}")
             with transaction.atomic():
                 # Category
                 category_name = request.data.get("category_name")
@@ -154,7 +155,7 @@ class ProductCreationAPIView(APIView):
                 )
 
         except Exception as e:
-            print("Traceback:", traceback.format_exc())
+            logger.debug("Traceback:", traceback.format_exc())
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -164,72 +165,119 @@ class ProductUpdateAPIView(APIView):
 
     def put(self, request, pk):
         try:
-            product = get_object_or_404(Product, pk=pk)
+            with transaction.atomic():
+                product = get_object_or_404(Product, pk=pk)
 
-            # Update basic fields
-            product.name = request.data.get("name", product.name)
-            product.sku = request.data.get("sku", product.sku)
-            product.description = request.data.get("description", product.description)
+                # --- Basic field updates ---
+                product.name = request.data.get("name", product.name)
+                product.sku = request.data.get("sku", product.sku)
+                product.description = request.data.get("description", product.description)
 
-            # Category
-            category_name = request.data.get("category_name")
-            if category_name:
-                category, _ = Category.objects.get_or_create(name=category_name)
-                product.category = category
+                # --- Category update ---
+                category_name = request.data.get("category_name")
+                if category_name:
+                    category, _ = Category.objects.get_or_create(name=category_name)
+                    product.category = category
 
-            # Brand
-            brand_name = request.data.get("brand_name")
-            if brand_name:
-                brand, _ = Brand.objects.get_or_create(name=brand_name)
-                product.brand = brand
+                # --- Brand update ---
+                brand_name = request.data.get("brand_name")
+                if brand_name:
+                    brand, _ = Brand.objects.get_or_create(name=brand_name)
+                    product.brand = brand
 
-            # Tags
-            tag_names = [t.strip() for t in request.data.get("tags", "").split(",") if t.strip()]
-            if tag_names:
-                tags = [Tag.objects.get_or_create(name=t)[0] for t in tag_names]
-                product.tags.set(tags)
+                # --- Tags update ---
+                tag_names = [t.strip() for t in request.data.get("tags", "").split(",") if t.strip()]
+                if tag_names:
+                    tags = [Tag.objects.get_or_create(name=t)[0] for t in tag_names]
+                    product.tags.set(tags)
 
-            # Image (optional)
-            if "image" in request.FILES:
-                product.image = request.FILES["image"]
+                # --- Image (optional) ---
+                if "image" in request.FILES:
+                    product.image = request.FILES["image"]
 
-            product.save()
+                product.save()
 
-            # Price update
-            if "price" in request.data:
-                try:
-                    new_price = Decimal(request.data["price"])
-                    active_price = ProductPrice.objects.filter(product=product, end_date__isnull=True).first()
+                # --- Price update ---
+                if "price" in request.data:
+                    try:
+                        new_price = Decimal(request.data["price"])
+                        active_price = ProductPrice.objects.filter(product=product, end_date__isnull=True).first()
 
-                    if active_price:
-                        active_price.price = new_price
-                        active_price.save()
-                    else:
-                        # If no active price exists, create one
-                        ProductPrice.objects.create(
-                            product=product,
-                            price=new_price,
-                            begin_date=timezone.now().date(),
-                            end_date=None
-                        )
-                except Exception as e:
-                    print(f"Price udpate error {e}")
+                        if active_price:
+                            active_price.price = new_price
+                            active_price.save()
+                        else:
+                            ProductPrice.objects.create(
+                                product=product,
+                                price=new_price,
+                                begin_date=timezone.now().date(),
+                                end_date=None
+                            )
+                    except Exception as e:
+                        logger.debug(f"Price update error: {e}")
 
-            # Stock update
-            if "stock" in request.data:
-                try:
-                    quantity = int(request.data["stock"])
-                    inventory = Inventory.objects.filter(product=product).first()
-                    if inventory:
-                        inventory.stock = quantity
+                # --- Stock update + journal ---
+                if "stock" in request.data:
+                    try:
+                        new_quantity = int(request.data["stock"])
+                        inventory = Inventory.objects.filter(product=product).first()
+
+                        previous_quantity = inventory.stock if inventory else 0
+                        inventory = inventory or Inventory(product=product)
+                        inventory.stock = new_quantity
                         inventory.save()
-                    else:
-                        Inventory.objects.create(product=product, stock=quantity)
-                except Exception as e:
-                    print(f"Inventory update error : {e}")
 
-            return Response({"message": "Product updated successfully"}, status=status.HTTP_200_OK)
+                        quantity_diff = new_quantity - previous_quantity
+                        if quantity_diff != 0:
+                            unit_price = ProductPrice.objects.filter(product=product, end_date__isnull=True).first()
+                            unit_price = unit_price.price if unit_price else Decimal("0")
+
+                            inventory_account = Account.objects.get(code="1200")  # Inventory
+                            accounts_payable = Account.objects.get(code="2000")  # Accounts Payable
+
+                            journal_entry = JournalEntry.objects.create(
+                                description=f"Inventory adjustment for product: {product.name}"
+                            )
+
+                            delta_value = unit_price * abs(quantity_diff)
+
+                            if quantity_diff > 0:
+                                # Inventory increased (purchase)
+                                JournalEntryLine.objects.create(
+                                    journal_entry=journal_entry,
+                                    account=inventory_account,
+                                    debit=delta_value,
+                                    credit=0,
+                                    description="Inventory increase"
+                                )
+                                JournalEntryLine.objects.create(
+                                    journal_entry=journal_entry,
+                                    account=accounts_payable,
+                                    debit=0,
+                                    credit=delta_value,
+                                    description="Accounts Payable"
+                                )
+                            else:
+                                # Inventory decreased (write-off or sale adjustment)
+                                JournalEntryLine.objects.create(
+                                    journal_entry=journal_entry,
+                                    account=inventory_account,
+                                    debit=0,
+                                    credit=delta_value,
+                                    description="Inventory decrease"
+                                )
+                                JournalEntryLine.objects.create(
+                                    journal_entry=journal_entry,
+                                    account=accounts_payable,
+                                    debit=delta_value,
+                                    credit=0,
+                                    description="Reversal from Accounts Payable"
+                                )
+                    except Exception as e:
+                        logger.debug(f"Inventory update error: {e}")
+
+                return Response({"message": "Product updated successfully"}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            print("Traceback:", traceback.format_exc())
+            logger.debug("Traceback:", traceback.format_exc())
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

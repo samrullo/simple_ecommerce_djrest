@@ -18,6 +18,9 @@ from .models import (
     Staff,
 )
 
+from django.contrib import admin
+from .models import Account, JournalEntry, JournalEntryLine
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -129,3 +132,30 @@ class RoleAdmin(admin.ModelAdmin):
 class StaffAdmin(admin.ModelAdmin):
     list_display = ["user", "role"]
     search_fields = ["user__username", "role__name"]
+
+
+@admin.register(Account)
+class AccountAdmin(admin.ModelAdmin):
+    list_display = ("code", "name", "account_type", "parent")
+    list_filter = ("account_type",)
+    search_fields = ("code", "name")
+
+
+class JournalEntryLineInline(admin.TabularInline):
+    model = JournalEntryLine
+    extra = 1
+
+
+@admin.register(JournalEntry)
+class JournalEntryAdmin(admin.ModelAdmin):
+    list_display = ("id", "date", "description", "reference", "is_balanced")
+    inlines = [JournalEntryLineInline]
+    search_fields = ("description", "reference")
+    readonly_fields = ("is_balanced",)
+
+
+@admin.register(JournalEntryLine)
+class JournalEntryLineAdmin(admin.ModelAdmin):
+    list_display = ("journal_entry", "account", "debit", "credit", "description")
+    list_filter = ("account",)
+    search_fields = ("description",)
