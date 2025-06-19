@@ -195,6 +195,9 @@ class ProductUpdateAPIView(APIView):
                 if "image" in request.FILES:
                     product.image = request.FILES["image"]
 
+                # updated at now
+                product.updated_at=timezone.now()
+
                 product.save()
 
                 # --- Price update ---

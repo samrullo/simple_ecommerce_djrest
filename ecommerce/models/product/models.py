@@ -69,7 +69,7 @@ class ProductPrice(models.Model):
     product = models.ForeignKey(Product, related_name="price", on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     discount_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    currency = models.CharField(max_length=10, default="USD")
+    currency = models.CharField(max_length=10, default="JPY")
 
     begin_date = models.DateField(default=timezone.now)
     end_date = models.DateField(blank=True, null=True)

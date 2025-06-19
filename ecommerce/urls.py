@@ -7,7 +7,7 @@ from .viewsets.user.viewsets import (
     StaffViewSet,
 )
 from .viewsets.order.viewsets import OrderViewSet, OrderItemViewSet, PaymentViewSet
-from .viewsets.inventory.viewsets import InventoryViewSet
+from .viewsets.inventory.viewsets import InventoryViewSet,PurchaseViewSet
 from .viewsets.product.viewsets import (
     CategoryViewSet,
     BrandViewSet,
@@ -23,6 +23,7 @@ from .viewsets.accounting.viewsets import (
     JournalEntryLineViewSet,
 )
 from .viewsets.product.viewsets import ProductCreationAPIView,ProductUpdateAPIView
+from .viewsets.inventory.viewsets import PurchaseCreateAPIView, PurchaseUpdateAPIView
 
 
 router = DefaultRouter()
@@ -32,6 +33,7 @@ router.register(r"tags", TagViewSet, basename="tag")
 router.register(r"products", ProductViewSet, basename="product")
 router.register(r"product-prices", ProductPriceViewSet, basename="product-price")
 router.register(r"inventories", InventoryViewSet, basename="inventory")
+router.register(r'purchases', PurchaseViewSet, basename='purchase')
 router.register(r"orders", OrderViewSet, basename="order")
 router.register(r"order-items", OrderItemViewSet, basename="order-item")
 router.register(r"payments", PaymentViewSet, basename="payment")
@@ -49,5 +51,7 @@ router.register(r"journal-entry-lines", JournalEntryLineViewSet)
 urlpatterns = [
     path("v1/", include(router.urls)),
     path("v1/create-product/",ProductCreationAPIView.as_view(),name="create-product"),
-    path("v1/update-product/<int:pk>/",ProductUpdateAPIView.as_view(),name="update-product")
+    path("v1/update-product/<int:pk>/",ProductUpdateAPIView.as_view(),name="update-product"),
+    path("v1/create-purchase/",PurchaseCreateAPIView.as_view(),name="create-purchase"),
+    path("v1/update-purchase/<int:pk>",PurchaseUpdateAPIView.as_view(),name="update-purchase")
 ]
