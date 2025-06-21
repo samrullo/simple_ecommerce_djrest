@@ -22,7 +22,7 @@ from .viewsets.accounting.viewsets import (
     JournalEntryViewSet,
     JournalEntryLineViewSet,
 )
-from .viewsets.product.viewsets import ProductCreationAPIView,ProductUpdateAPIView
+from .viewsets.product.viewsets import ProductCreationAPIView,ProductUpdateAPIView,ProductCreateUpdateFromCSVAPIView
 from .viewsets.inventory.viewsets import PurchaseCreateAPIView, PurchaseUpdateAPIView
 
 
@@ -52,6 +52,7 @@ urlpatterns = [
     path("v1/", include(router.urls)),
     path("v1/create-product/",ProductCreationAPIView.as_view(),name="create-product"),
     path("v1/update-product/<int:pk>/",ProductUpdateAPIView.as_view(),name="update-product"),
+    path("v1/create-update-products-from-csv/",ProductCreateUpdateFromCSVAPIView.as_view(),name="create_update_products_from_csv"),
     path("v1/create-purchase/",PurchaseCreateAPIView.as_view(),name="create-purchase"),
     path("v1/update-purchase/<int:pk>",PurchaseUpdateAPIView.as_view(),name="update-purchase")
 ]

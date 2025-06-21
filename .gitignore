@@ -177,3 +177,5 @@ creds/
 *credentials*
 
 media/
+
+py_wheels/
