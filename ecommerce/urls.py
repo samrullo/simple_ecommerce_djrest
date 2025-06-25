@@ -7,7 +7,8 @@ from .viewsets.user.viewsets import (
     StaffViewSet,
 )
 from .viewsets.order.viewsets import OrderViewSet, OrderItemViewSet, PaymentViewSet
-from .viewsets.inventory.viewsets import InventoryViewSet,PurchaseViewSet
+from .viewsets.inventory.viewsets import InventoryViewSet
+from .viewsets.purchase.viewsets import PurchaseViewSet, PurchaseCreateAPIView, PurchaseUpdateAPIView
 from .viewsets.product.viewsets import (
     CategoryViewSet,
     BrandViewSet,
@@ -23,8 +24,6 @@ from .viewsets.accounting.viewsets import (
     JournalEntryLineViewSet,
 )
 from .viewsets.product.viewsets import ProductCreationAPIView,ProductUpdateAPIView,ProductCreateUpdateFromCSVAPIView
-from .viewsets.inventory.viewsets import PurchaseCreateAPIView, PurchaseUpdateAPIView
-
 
 router = DefaultRouter()
 router.register(r"categories", CategoryViewSet, basename="category")
@@ -54,5 +53,5 @@ urlpatterns = [
     path("v1/update-product/<int:pk>/",ProductUpdateAPIView.as_view(),name="update-product"),
     path("v1/create-update-products-from-csv/",ProductCreateUpdateFromCSVAPIView.as_view(),name="create_update_products_from_csv"),
     path("v1/create-purchase/",PurchaseCreateAPIView.as_view(),name="create-purchase"),
-    path("v1/update-purchase/<int:pk>",PurchaseUpdateAPIView.as_view(),name="update-purchase")
+    path("v1/update-purchase/<int:pk>/",PurchaseUpdateAPIView.as_view(),name="update-purchase")
 ]
