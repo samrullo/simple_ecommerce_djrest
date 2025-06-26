@@ -1,5 +1,8 @@
 import logging
 from rest_framework import viewsets, permissions
+from rest_framework.exceptions import NotFound
+from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
+
 from ecommerce.models import Customer, Address, Role, Staff
 from ecommerce.serializers import (
     CustomerSerializer,
@@ -18,6 +21,11 @@ from django.contrib.auth import get_user_model
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from dj_rest_auth.registration.views import RegisterView
+from ecommerce.serializers.user.serializers import CustomRegisterSerializer
+from dj_rest_auth.views import LoginView
+from ecommerce.serializers.user.serializers import CustomUserSerializer
 
 User = get_user_model()
 
@@ -48,25 +56,36 @@ class StaffViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAdminUser]
 
 
-class CustomVerifyEmailView(VerifyEmailView):
-    def get(self, *args, **kwargs):
-        self.object = self.get_object()  # Fetch the email confirmation object
-        self.object.confirm(self.request)  # Confirm the email
-        return Response({"detail": "Email confirmed"}, status=status.HTTP_200_OK)
+class CustomVerifyEmailView(APIView):
+    def get(self, request, key, *args, **kwargs):
+        try:
+            confirmation = EmailConfirmationHMAC.from_key(key)
+            if not confirmation:
+                logger.debug("Invalid or expired email confirmation key")
+                return Response(
+                    {"detail": "Invalid or expired confirmation link."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
+            email_address = confirmation.email_address
+            if email_address.verified:
+                logger.debug(f"Email already verified: {email_address.email}")
+                return Response({"detail": "Email is already verified."}, status=status.HTTP_200_OK)
 
-# ecommerce/views.py (or another appropriate module)
-from dj_rest_auth.registration.views import RegisterView
-from ecommerce.serializers.user.serializers import CustomRegisterSerializer
+            confirmation.confirm(request)
+            logger.debug(f"Email marked as verified for: {email_address.email}")
+            return Response({"detail": "Email successfully verified."}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.exception("Unexpected error during email confirmation")
+            return Response(
+                {"detail": f"Unexpected error during confirmation: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class CustomRegisterView(RegisterView):
     serializer_class = CustomRegisterSerializer
-
-
-# ecommerce/views.py
-from dj_rest_auth.views import LoginView
-from ecommerce.serializers.user.serializers import CustomUserSerializer
 
 
 class CustomLoginView(LoginView):
@@ -79,9 +98,9 @@ class CustomLoginView(LoginView):
         if self.user:
             logger.debug("Modifying response data with custom user details")
             refresh = TokenObtainPairSerializer.get_token(self.user)
-            access_token=refresh.access_token
-            response.data["refresh"]=str(refresh)
-            response.data["access"]=str(access_token)
+            access_token = refresh.access_token
+            response.data["refresh"] = str(refresh)
+            response.data["access"] = str(access_token)
             # Replace the default 'user' key with data from your custom serializer
             response.data["user"] = CustomUserSerializer(
                 self.user, context=self.get_serializer_context()

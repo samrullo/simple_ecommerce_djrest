@@ -4,6 +4,10 @@ from rest_framework import serializers
 from ecommerce.models import Customer, Address, Role, Staff
 from django.contrib.auth import get_user_model
 from allauth.account.adapter import DefaultAccountAdapter
+from allauth.account.models import EmailConfirmation
+from allauth.account.utils import user_email, user_field
+from django.conf import settings
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -114,3 +118,32 @@ class CustomAccountAdapter(DefaultAccountAdapter):
                 logger.debug("Address created with: %s", address_data)
 
         return user
+
+    def send_confirmation_mail(self, request, emailconfirmation: EmailConfirmation, signup):
+        """
+        Override the confirmation link sent in the email.
+        """
+        logger.debug("CustomAccountAdapter.send_confirmation_mail called")
+
+        # 🔗 Build a link to your React frontend
+        react_link = f"http://localhost:3000/verify-email/{emailconfirmation.key}"
+        logger.debug(f"Generated react verification link: {react_link}")
+
+        ctx = {
+            "user": emailconfirmation.email_address.user,
+            "activate_url": react_link,
+            "current_site": None,
+            "key": emailconfirmation.key,
+        }
+        self.send_mail("account/email/email_confirmation", emailconfirmation.email_address.email, ctx)
+
+    # def confirm_email(self, request, email_address):
+    #     logger.debug(f"Confirming email for: {email_address.email}")
+    #
+    #     # ✅ Explicitly mark as verified
+    #     email_address.verified = True
+    #     email_address.save()
+    #
+    #     # ✅ Optionally set user on request
+    #     request.user = email_address.user
+    #     logger.debug(f"Email marked as verified for user: {email_address.user}")

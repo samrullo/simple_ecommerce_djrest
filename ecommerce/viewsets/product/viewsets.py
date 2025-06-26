@@ -2,12 +2,10 @@ import logging
 import traceback
 import pandas as pd
 from django.utils import timezone
-from rest_framework import viewsets, permissions
+from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from ecommerce.serializers import ProductSerializer
-from ecommerce.serializers.accounting.serializers import JournalEntrySerializer
 from typing import List
 from decimal import Decimal
 from django.db import transaction
@@ -15,15 +13,8 @@ from rest_framework import viewsets, status
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.permissions import IsAuthenticated
 from sampytools.list_utils import get_list_diff
 from ecommerce.permissions import IsStaff
-from ecommerce.models import (
-    Inventory,
-    Account,
-    JournalEntry,
-    JournalEntryLine,
-)
 from ecommerce.permissions import IsStaffOrReadOnly
 
 from ecommerce.models import (
@@ -44,6 +35,7 @@ from ecommerce.serializers import (
     ProductReviewSerializer,
     WishlistSerializer,
 )
+from ecommerce.viewsets.accounting.viewsets import journal_entries_for_direct_inventory_changes
 
 logger = logging.getLogger(__name__)
 
@@ -179,79 +171,6 @@ def add_or_update_product_price(product: Product, price: str | int | float):
             )
     except Exception as e:
         logger.debug(f"Price update error: {e}")
-
-
-def journal_entries_for_direct_inventory_changes(product: Product,
-                                                 new_quantity: int,
-                                                 inventory_account_code: str = "1200",
-                                                 accounts_payable_account_code: str = "2000") -> Inventory:
-    """
-    Make journal entries related to direct inventory change.
-    When inventory increased it means you purchased products and spent cash
-    :param product:
-    :param new_quantity:
-    :param inventory_account_code:
-    :param accounts_payable_account_code:
-    :return:
-    """
-    # get inventory related to this product
-    inventory = Inventory.objects.filter(product=product).first()
-
-    # existing inventory of the product before change
-    previous_quantity = inventory.stock if inventory else 0
-    inventory = inventory or Inventory(product=product)
-    inventory.stock = new_quantity
-    inventory.save()
-
-    quantity_diff = new_quantity - previous_quantity
-    if quantity_diff != 0:
-        # simply getting product price
-        unit_price = ProductPrice.objects.filter(product=product, end_date__isnull=True).first()
-        unit_price = unit_price.price if unit_price else Decimal("0")
-
-        inventory_account = Account.objects.get(code=inventory_account_code)  # Inventory
-        accounts_payable = Account.objects.get(code=accounts_payable_account_code)  # Accounts Payable
-
-        # journal entry to record inventory changes. This journal entry will have two JournalEntryLines associated with it
-        journal_entry = JournalEntry.objects.create(
-            description=f"Inventory adjustment for product: {product.name}"
-        )
-
-        delta_value = unit_price * abs(quantity_diff)
-
-        if quantity_diff > 0:
-            # Inventory increased (purchase)
-            JournalEntryLine.objects.create(
-                journal_entry=journal_entry,
-                account=inventory_account,
-                debit=delta_value,
-                credit=0,
-                description="Inventory increase"
-            )
-            JournalEntryLine.objects.create(
-                journal_entry=journal_entry,
-                account=accounts_payable,
-                debit=0,
-                credit=delta_value,
-                description="Accounts Payable"
-            )
-        else:
-            # Inventory decreased (write-off or sale adjustment)
-            JournalEntryLine.objects.create(
-                journal_entry=journal_entry,
-                account=inventory_account,
-                debit=0,
-                credit=delta_value,
-                description="Inventory decrease"
-            )
-            JournalEntryLine.objects.create(
-                journal_entry=journal_entry,
-                account=accounts_payable,
-                debit=delta_value,
-                credit=0,
-                description="Reversal from Accounts Payable"
-            )
-    return inventory
 
 
 class ProductCreationAPIView(APIView):
