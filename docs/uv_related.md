@@ -11,3 +11,9 @@ to upgrade
 ```bash
 uv pip compile --upgrade requirements.in -o requirements.txt
 ```
+
+to add library to dependency and install simultaneously
+
+```bash
+uv add --find-links ./py_wheels python-dotenv
+```

@@ -26,6 +26,8 @@ from ecommerce.models import (
     ProductReview,
     Wishlist,
 )
+from ecommerce.models.product.models import Currency, FXRate
+from ecommerce.serializers.product.serializers import CurrencySerializer, FXRateSerializer
 from ecommerce.serializers import (
     CategorySerializer,
     BrandSerializer,
@@ -40,28 +42,40 @@ from ecommerce.viewsets.accounting.viewsets import journal_entries_for_direct_in
 logger = logging.getLogger(__name__)
 
 
+class CurrencyViewSet(viewsets.ModelViewSet):
+    queryset = Currency.objects.all()
+    serializer_class = CurrencySerializer
+    permission_classes = [IsStaffOrReadOnly]
+
+
+class FXRateViewSet(viewsets.ModelViewSet):
+    queryset = FXRate.objects.all()
+    serializer_class = FXRateSerializer
+    permission_classes = [IsStaffOrReadOnly]
+
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsStaff]
 
 
 class BrandViewSet(viewsets.ModelViewSet):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsStaff]
 
 
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsStaff]
 
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsStaffOrReadOnly]
 
 
 class ProductPriceViewSet(viewsets.ModelViewSet):
@@ -73,16 +87,26 @@ class ProductPriceViewSet(viewsets.ModelViewSet):
 class ProductReviewViewSet(viewsets.ModelViewSet):
     queryset = ProductReview.objects.all()
     serializer_class = ProductReviewSerializer
-    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+    permission_classes = [IsStaffOrReadOnly]
 
 
 class WishlistViewSet(viewsets.ModelViewSet):
     queryset = Wishlist.objects.all()
     serializer_class = WishlistSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsStaffOrReadOnly]
 
 
-def make_new_product(name, description, category: Category, sku, brand: Brand = None, image=None):
+def make_new_product(name, description, category: Category, sku, brand: Brand = None, image=None) -> Product:
+    """
+    Make new product
+    :param name:
+    :param description:
+    :param category:
+    :param sku:
+    :param brand:
+    :param image:
+    :return:
+    """
     return Product.objects.create(
         name=name,
         description=description,
@@ -148,24 +172,28 @@ def add_or_update_product(category_name: str,
     return product
 
 
-def add_or_update_product_price(product: Product, price: str | int | float):
+def add_or_update_product_price(product: Product, price: str | int | float, currency_code: str):
     """
     Create or update product price
     :param product:
     :param price:
+    :param currency_code: price currency
     :return:
     """
     try:
+        currency_obj = Currency.objects.filter(code=currency_code).first()
         new_price = Decimal(price)
         active_price = ProductPrice.objects.filter(product=product, end_date__isnull=True).first()
 
         if active_price:
             active_price.price = new_price
+            active_price.currency = currency_obj
             active_price.save()
         else:
             ProductPrice.objects.create(
                 product=product,
                 price=new_price,
+                currency=currency_obj,
                 begin_date=timezone.now().date(),
                 end_date=None
             )
@@ -204,7 +232,7 @@ class ProductCreationAPIView(APIView):
                                                 product_sku=request.data.get("sku"),
                                                 product_image=request.data.get("image"))
                 # Price
-                add_or_update_product_price(product, request.data.get("price"))
+                add_or_update_product_price(product, request.data.get("price"), request.data.get("currency"))
 
                 # Inventory
                 quantity = int(request.data.get("stock", 1))
@@ -246,7 +274,7 @@ class ProductUpdateAPIView(APIView):
 
                 # --- Price update ---
                 if "price" in request.data:
-                    add_or_update_product_price(product, request.data.get("price"))
+                    add_or_update_product_price(product, request.data.get("price"), request.data.get("currency"))
                 # --- Stock update + journal ---
                 if "stock" in request.data:
                     try:

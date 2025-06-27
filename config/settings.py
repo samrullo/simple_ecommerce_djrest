@@ -11,9 +11,15 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import logging
+import os
+from dotenv import load_dotenv
 from pathlib import Path
 from datetime import timedelta
 from django.urls import reverse_lazy
+
+load_dotenv()
+
+ACCOUNTING_CURRENCY = os.environ.get("ACCOUNTING_CURRENCY")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

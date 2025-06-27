@@ -18,7 +18,7 @@ from .models import (
     Staff,
 )
 
-from django.contrib import admin
+from ecommerce.models.product.models import Currency, FXRate
 from .models import Account, JournalEntry, JournalEntryLine
 
 
@@ -159,3 +159,16 @@ class JournalEntryLineAdmin(admin.ModelAdmin):
     list_display = ("journal_entry", "account", "debit", "credit", "description")
     list_filter = ("account",)
     search_fields = ("description",)
+
+
+@admin.register(Currency)
+class CurrencyAdmin(admin.ModelAdmin):
+    list_display = ("code", "name", "symbol", "decimal_places")
+    search_fields = ("code", "name")
+
+
+@admin.register(FXRate)
+class FXRateAdmin(admin.ModelAdmin):
+    list_display = ("currency_from", "currency_to", "rate", "start_date", "end_date")
+    list_filter = ("currency_from", "currency_to", "start_date")
+    search_fields = ("currency_from__code", "currency_to__code")

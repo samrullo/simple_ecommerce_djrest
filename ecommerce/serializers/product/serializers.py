@@ -9,8 +9,25 @@ from ecommerce.models import (
     ProductReview,
     Wishlist,
 )
+from ecommerce.models.product.models import Currency,FXRate
 from ecommerce.serializers.user.serializers import CustomerSerializer
 from ecommerce.serializers.inventory.serializers import InventorySerializer
+
+class CurrencySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Currency
+        fields = '__all__'
+
+
+class FXRateSerializer(serializers.ModelSerializer):
+    currency_from = CurrencySerializer(read_only=True)
+    currency_to = CurrencySerializer(read_only=True)
+    currency_from_id = serializers.PrimaryKeyRelatedField(source="currency_from", queryset=Currency.objects.all(), write_only=True)
+    currency_to_id = serializers.PrimaryKeyRelatedField(source="currency_to", queryset=Currency.objects.all(), write_only=True)
+
+    class Meta:
+        model = FXRate
+        fields = ['id', 'currency_from', 'currency_to', 'rate', 'start_date', 'end_date', 'source', 'is_active', 'currency_from_id', 'currency_to_id']
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -32,6 +49,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class ProductPriceSerializer(serializers.ModelSerializer):
+    currency = CurrencySerializer(read_only=True)
     class Meta:
         model = ProductPrice
         fields = "__all__"

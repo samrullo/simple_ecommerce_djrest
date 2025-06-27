@@ -24,11 +24,14 @@ from .viewsets.accounting.viewsets import (
     JournalEntryLineViewSet,
 )
 from .viewsets.product.viewsets import ProductCreationAPIView,ProductUpdateAPIView,ProductCreateUpdateFromCSVAPIView
+from ecommerce.viewsets.product.viewsets import CurrencyViewSet,FXRateViewSet
 
 router = DefaultRouter()
 router.register(r"categories", CategoryViewSet, basename="category")
 router.register(r"brands", BrandViewSet, basename="brand")
 router.register(r"tags", TagViewSet, basename="tag")
+router.register(r"currencies",CurrencyViewSet,basename="currency")
+router.register(r"fxrates",FXRateViewSet,basename="fxrate")
 router.register(r"products", ProductViewSet, basename="product")
 router.register(r"product-prices", ProductPriceViewSet, basename="product-price")
 router.register(r"inventories", InventoryViewSet, basename="inventory")

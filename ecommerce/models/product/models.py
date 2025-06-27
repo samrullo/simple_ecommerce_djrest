@@ -2,6 +2,33 @@ from django.db import models
 from django.utils import timezone
 from ecommerce.models.users.models import Customer
 
+class Currency(models.Model):
+    code = models.CharField(max_length=3, unique=True)  # e.g., 'USD', 'JPY'
+    name = models.CharField(max_length=32)
+    symbol = models.CharField(max_length=5, blank=True, null=True)
+    decimal_places = models.PositiveSmallIntegerField(default=2)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.code} ({self.name})"
+
+
+class FXRate(models.Model):
+    currency_from = models.ForeignKey(Currency, related_name='fx_from', on_delete=models.CASCADE)
+    currency_to = models.ForeignKey(Currency, related_name='fx_to', on_delete=models.CASCADE)
+    rate = models.DecimalField(max_digits=20, decimal_places=6)
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+    source = models.CharField(max_length=64, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ("currency_from", "currency_to", "start_date")
+        ordering = ["-start_date"]
+
+    def __str__(self):
+        return f"{self.currency_from.code}/{self.currency_to.code} @ {self.rate} ({self.start_date} - {self.end_date})"
+
 
 class Category(models.Model):
     """
@@ -69,7 +96,7 @@ class ProductPrice(models.Model):
     product = models.ForeignKey(Product, related_name="price", on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     discount_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    currency = models.CharField(max_length=10, default="JPY")
+    currency = models.ForeignKey(Currency,on_delete=models.SET_NULL,null=True)
 
     begin_date = models.DateField(default=timezone.now)
     end_date = models.DateField(blank=True, null=True)
