@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal
 from rest_framework import viewsets, permissions
 from django.utils import timezone
@@ -11,6 +12,7 @@ from ecommerce.serializers.accounting.serializers import (
 
 from ecommerce.models.purchase.models import Purchase
 
+logger=logging.getLogger(__name__)
 
 class AccountViewSet(viewsets.ModelViewSet):
     queryset = Account.objects.all()
@@ -44,6 +46,7 @@ def journal_entries_for_direct_inventory_changes(
     """
     previous_quantity = sum(inv.stock for inv in Inventory.objects.filter(product=product))
     quantity_diff = new_quantity - previous_quantity
+    logger.debug(f"Will make changes to {product} inventory with quantity_diff {quantity_diff}, previous_quantity : {previous_quantity}, new_quantity : {new_quantity}")
 
     if quantity_diff == 0:
         return []  # No change, nothing to do
@@ -90,6 +93,7 @@ def journal_entries_for_direct_inventory_changes(
             credit=delta_value,
             description="Accounts Payable for inventory increase"
         )
+        logger.debug(f"Increased inventory of {product} by {quantity_diff}")
         return [inventory_record]
 
     else:
@@ -98,10 +102,12 @@ def journal_entries_for_direct_inventory_changes(
         remaining_qty = abs(quantity_diff)
         removed_batches = []
 
-        for inv in inventory_records:
+        for inv_idx,inv in enumerate(inventory_records):
             if remaining_qty == 0:
                 break
+            logger.debug(f"Reducing inventory of {product} by remaining_qty {remaining_qty} by procesing inventory record {inv_idx}")
             reduce_qty = min(inv.stock, remaining_qty)
+            logger.debug(f"Actual reduce_qty for this inventory {inv_idx} will be {reduce_qty}")
             cost = inv.purchase.price_per_unit * reduce_qty
             delta_value += cost
 
@@ -109,6 +115,7 @@ def journal_entries_for_direct_inventory_changes(
             inv.save()
             remaining_qty -= reduce_qty
             removed_batches.append(inv)
+
 
             # Record journal lines per batch if needed
             JournalEntryLine.objects.create(

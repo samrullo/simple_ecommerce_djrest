@@ -1,16 +1,17 @@
 from decimal import Decimal
-
-from django.db import transaction
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from ecommerce.models import Product, Inventory, Account, JournalEntry, JournalEntryLine
-from ecommerce.models.purchase.models import Purchase
-from ecommerce.permissions import IsStaff
+from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.db import transaction
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+import pandas as pd
+import traceback
 from ecommerce.serializers.purchase.serializers import PurchaseSerializer
+from ecommerce.models import Product, Purchase, Inventory, Account, JournalEntry, JournalEntryLine
+from ecommerce.permissions import IsStaff
 
 
 class PurchaseViewSet(viewsets.ModelViewSet):
@@ -41,9 +42,8 @@ class PurchaseCreateAPIView(APIView):
                 )
 
                 # Update inventory (assumes one inventory record per product for now)
-                inventory, _ = Inventory.objects.get_or_create(product=product)
-                inventory.stock += quantity
-                inventory.save()
+                Inventory.objects.create(product=product,purchase=purchase,stock=quantity)
+
 
                 # Journal entries
                 inventory_account = Account.objects.get(code="1200")
@@ -96,7 +96,7 @@ class PurchaseUpdateAPIView(APIView):
                 quantity_diff = new_quantity - purchase.quantity
 
                 # Update inventory
-                inventory = Inventory.objects.filter(product=purchase.product).first()
+                inventory = Inventory.objects.filter(product=purchase.product,purchase=purchase).first()
                 if inventory:
                     inventory.stock += quantity_diff
                     inventory.save()
@@ -112,7 +112,7 @@ class PurchaseUpdateAPIView(APIView):
                 accounts_payable = Account.objects.get(code="2000")       # Accounts Payable
 
                 journal_entry = JournalEntry.objects.create(
-                    description=f"Adjustment for purchase update #{purchase.id}"
+                    description=f"Adjustment for purchase update #{purchase.id} {purchase}"
                 )
 
                 if delta != 0:
@@ -153,3 +153,71 @@ class PurchaseUpdateAPIView(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class PurchaseCreateUpdateFromCSVAPIView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsStaff]
+
+    def post(self, request):
+        try:
+            file_obj = request.FILES.get("file")
+            if not file_obj:
+                return Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
+
+            df = pd.read_csv(file_obj)
+            required_cols = ["product_name", "quantity", "price_per_unit"]
+            missing_cols = [col for col in required_cols if col not in df.columns]
+            if missing_cols:
+                return Response({"error": f"Missing columns: {missing_cols}"}, status=status.HTTP_400_BAD_REQUEST)
+
+            for i, row in df.iterrows():
+                with transaction.atomic():
+                    product_name = row["product_name"]
+                    quantity = int(row["quantity"])
+                    price_per_unit = Decimal(row["price_per_unit"])
+                    purchase_date = row.get("purchase_date")
+                    purchase_datetime = timezone.datetime.strptime(purchase_date, "%Y-%m-%d") if pd.notna(purchase_date) else timezone.now()
+
+                    product = Product.objects.filter(name__iexact=product_name).first()
+                    if not product:
+                        raise ValueError(f"Product not found: {product_name}")
+
+                    purchase = Purchase.objects.create(
+                        product=product,
+                        quantity=quantity,
+                        price_per_unit=price_per_unit,
+                        purchase_datetime=purchase_datetime,
+                    )
+
+                    Inventory.objects.create(product=product, purchase=purchase, stock=quantity)
+
+                    inventory_account = Account.objects.get(code="1200")
+                    accounts_payable = Account.objects.get(code="2000")
+                    total_cost = price_per_unit * quantity
+
+                    journal_entry = JournalEntry.objects.create(
+                        description=f"Bulk purchase of {quantity} {product.name}"
+                    )
+
+                    JournalEntryLine.objects.create(
+                        journal_entry=journal_entry,
+                        account=inventory_account,
+                        debit=total_cost,
+                        credit=0,
+                        description="Inventory increase from CSV purchase",
+                    )
+                    JournalEntryLine.objects.create(
+                        journal_entry=journal_entry,
+                        account=accounts_payable,
+                        debit=0,
+                        credit=total_cost,
+                        description="Accounts Payable for CSV purchase",
+                    )
+
+            return Response({"message": f"Successfully processed {len(df)} purchases."}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            traceback_str = traceback.format_exc()
+            return Response({"error": str(e), "trace": traceback_str}, status=status.HTTP_400_BAD_REQUEST)

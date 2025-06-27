@@ -47,7 +47,6 @@ REST_AUTH = {
     "JWT_AUTH_COOKIE": "jwt-auth",
 }
 
-
 REST_AUTH_REGISTER_SERIALIZERS = {
     "REGISTER_SERIALIZER": "ecommerce.serializers.user.serializers.CustomRegisterSerializer",
 }
@@ -60,7 +59,6 @@ REST_AUTH_USER_DETAILS_SERIALIZER = (
 REST_AUTH_SERIALIZERS = {
     "LOGIN_SERIALIZER": "ecommerce.serializers.user.serializers.CustomLoginSerializer",
 }
-
 
 # Optional: so emails show http://localhost:3000 instead of backend's domain
 SITE_DOMAIN = "localhost:3000"
@@ -180,13 +178,11 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
-
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
 }
