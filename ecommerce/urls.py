@@ -14,6 +14,7 @@ from .viewsets.product.viewsets import (
     BrandViewSet,
     TagViewSet,
     ProductViewSet,
+ProductWithImageListView,
     ProductPriceViewSet,
     ProductReviewViewSet,
     WishlistViewSet,
@@ -52,6 +53,7 @@ router.register(r"journal-entry-lines", JournalEntryLineViewSet)
 
 urlpatterns = [
     path("v1/", include(router.urls)),
+    path("v1/products-with-images/",ProductWithImageListView.as_view(),name="products-with-images"),
     path("v1/create-product/",ProductCreationAPIView.as_view(),name="create-product"),
     path("v1/update-product/<int:pk>/",ProductUpdateAPIView.as_view(),name="update-product"),
     path("v1/create-update-products-from-csv/",ProductCreateUpdateFromCSVAPIView.as_view(),name="create_update_products_from_csv"),

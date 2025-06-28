@@ -1,6 +1,6 @@
 from django.db import models
 
-from ecommerce.models.product.models import Product
+from ecommerce.models.product.models import Product, Currency
 
 
 class Order(models.Model):
@@ -38,9 +38,10 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return f"{self.product.name} - {self.quantity} pcs"
+        return f"OrderItem {self.product.name} - {self.quantity} pcs at price {self.price} {self.currency}"
 
 
 class Payment(models.Model):

@@ -1,13 +1,13 @@
 from rest_framework import serializers
-
+from ecommerce.models.product.models import Currency
 from ecommerce.models import OrderItem, Order, Payment
-from ecommerce.serializers.product.serializers import ProductSerializer
+from ecommerce.serializers.product.serializers import ProductSerializer,CurrencySerializer
 from ecommerce.serializers.user.serializers import CustomerSerializer
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
-
+    currency = CurrencySerializer(read_only=True)
     class Meta:
         model = OrderItem
         fields = "__all__"

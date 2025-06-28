@@ -23,6 +23,7 @@ from ecommerce.models import (
     Brand,
     Tag,
     Product,
+    ProductImage,
     ProductPrice,
     ProductReview,
     Wishlist,
@@ -34,6 +35,7 @@ from ecommerce.serializers import (
     BrandSerializer,
     TagSerializer,
     ProductSerializer,
+    ProductImageSerializer,
     ProductPriceSerializer,
     ProductReviewSerializer,
     WishlistSerializer,
@@ -78,6 +80,21 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     permission_classes = [IsStaffOrReadOnly]
 
+# views.py
+
+from rest_framework.generics import ListAPIView
+from ecommerce.models.product.models import Product
+from ecommerce.serializers.product.serializers import ProductWithImageSerializer
+
+class ProductWithImageListView(ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductWithImageSerializer
+
+class ProductImageViewset(viewsets.ModelViewSet):
+    queryset = ProductImage.objects.all()
+    serializer_class = ProductImageSerializer
+    permission_classes = [IsStaffOrReadOnly]
+
 
 class ProductPriceViewSet(viewsets.ModelViewSet):
     queryset = ProductPrice.objects.all()
@@ -97,7 +114,7 @@ class WishlistViewSet(viewsets.ModelViewSet):
     permission_classes = [IsStaffOrReadOnly]
 
 
-def make_new_product(name, description, category: Category, sku, brand: Brand = None, image=None) -> Product:
+def make_new_product(name, description, category: Category, sku, brand: Brand = None, product_image=None) -> Product:
     """
     Make new product
     :param name:
@@ -105,17 +122,18 @@ def make_new_product(name, description, category: Category, sku, brand: Brand = 
     :param category:
     :param sku:
     :param brand:
-    :param image:
+    :param product_image:
     :return:
     """
-    return Product.objects.create(
+    product= Product.objects.create(
         name=name,
         description=description,
-        image=image,
         sku=sku,
         category=category,
         brand=brand,
     )
+    ProductImage.objects.create(product=product, image=product_image, tag="icon")
+    return product
 
 
 def add_or_update_product(category_name: str,
@@ -156,7 +174,12 @@ def add_or_update_product(category_name: str,
         if product_sku:
             product.sku = product_sku
         if product_image:
-            product.image = product_image
+            product_image_obj = ProductImage.objects.filter(product=product,tag="icon").first()
+            if product_image_obj is None:
+                ProductImage.objects.create(product=product,tag="icon",image=product_image)
+            else:
+                product_image_obj.image = product_image
+                product_image_obj.save()
         if brand:
             product.brand = brand
         # updated at now
