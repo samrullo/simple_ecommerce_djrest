@@ -43,6 +43,7 @@ from ecommerce.models.accounting.models import Account
 from ecommerce.viewsets.accounting.viewsets import journal_entry_when_product_is_sold_fifo
 from ecommerce.models.accounting.models import JournalEntry, JournalEntryLine
 
+# TODO : build Order react component that allows user to add products to shopping cart and sends request to create order
 class OrderCreateAPIView(APIView):
     def post(self, request):
         try:

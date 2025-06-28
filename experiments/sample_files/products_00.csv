@@ -1,3 +1,3 @@
-product_name,category_name,price,stock,brand_name,tag_names
-pilot pen,Stationary,431.00,14,pilot,"pen,pilot"
-motorcycle,Vehicle,13245.00,23,yamaha,"motorcycle,vehicle"
+product_name,category_name,price,stock,brand_name,tag_names,currency
+pilot pen,Stationary,431.00,14,pilot,"pen,pilot","JPY"
+motorcycle,Vehicle,5000.00,25,yamaha,"motorcycle,vehicle","USD"

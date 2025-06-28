@@ -2,6 +2,7 @@ import logging
 import traceback
 import pandas as pd
 from django.utils import timezone
+from django.conf import settings
 from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
@@ -336,7 +337,9 @@ class ProductCreateUpdateFromCSVAPIView(APIView):
                         sku = row["product_name"].upper()
                     product = add_or_update_product(row["category_name"], brand_name, tag_names, pk,
                                                     row["product_name"], description, sku)
-                    add_or_update_product_price(product, row["price"])
+                    currency_code = row.get("currency")
+                    currency_code = currency_code if pd.notna(currency_code) else settings.ACCOUNTING_CURRENCY
+                    add_or_update_product_price(product, row["price"], currency_code)
                     journal_entries_for_direct_inventory_changes(product, row["stock"], "1200", "2000")
                 logger.debug(
                     f"Finished creating or updating product with name : {row['product_name']}, category_name : {row['category_name']},brand_name : {brand_name}, tag_names : {tag_names}, price :{row['price']}, stock : {row['stock']}")

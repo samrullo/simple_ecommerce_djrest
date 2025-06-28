@@ -5,12 +5,14 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.db import transaction
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 import pandas as pd
 import traceback
 from ecommerce.serializers.purchase.serializers import PurchaseSerializer
 from ecommerce.models import Product, Purchase, Inventory, Account, JournalEntry, JournalEntryLine
+from ecommerce.models.product.models import Currency
 from ecommerce.permissions import IsStaff
 
 
@@ -28,6 +30,8 @@ class PurchaseCreateAPIView(APIView):
             product_id = request.data.get("product_id")
             quantity = int(request.data.get("quantity"))
             price_per_unit = Decimal(request.data.get("price_per_unit"))
+            currency_code = request.data.get("currency")
+            currency = Currency.objects.filter(code=currency_code).first()
             purchase_datetime = request.data.get("purchase_datetime") or timezone.now()
 
             with transaction.atomic():
@@ -38,12 +42,12 @@ class PurchaseCreateAPIView(APIView):
                     product=product,
                     quantity=quantity,
                     price_per_unit=price_per_unit,
+                    currency=currency,
                     purchase_datetime=purchase_datetime,
                 )
 
                 # Update inventory (assumes one inventory record per product for now)
-                Inventory.objects.create(product=product,purchase=purchase,stock=quantity)
-
+                Inventory.objects.create(product=product, purchase=purchase, stock=quantity)
 
                 # Journal entries
                 inventory_account = Account.objects.get(code="1200")
@@ -86,6 +90,8 @@ class PurchaseUpdateAPIView(APIView):
 
             new_quantity = int(request.data.get("quantity", purchase.quantity))
             new_price_per_unit = Decimal(request.data.get("price_per_unit", purchase.price_per_unit))
+            currency_code = request.data.get("currency")
+            currency = Currency.objects.filter(code=currency_code).first()
             new_datetime = request.data.get("purchase_datetime", purchase.purchase_datetime)
 
             with transaction.atomic():
@@ -96,7 +102,7 @@ class PurchaseUpdateAPIView(APIView):
                 quantity_diff = new_quantity - purchase.quantity
 
                 # Update inventory
-                inventory = Inventory.objects.filter(product=purchase.product,purchase=purchase).first()
+                inventory = Inventory.objects.filter(product=purchase.product, purchase=purchase).first()
                 if inventory:
                     inventory.stock += quantity_diff
                     inventory.save()
@@ -104,12 +110,13 @@ class PurchaseUpdateAPIView(APIView):
                 # Update purchase
                 purchase.quantity = new_quantity
                 purchase.price_per_unit = new_price_per_unit
+                purchase.currency = currency
                 purchase.purchase_datetime = new_datetime
                 purchase.save()
 
                 # Create new journal entry to reflect the adjustment
-                inventory_account = Account.objects.get(code="1200")      # Inventory
-                accounts_payable = Account.objects.get(code="2000")       # Accounts Payable
+                inventory_account = Account.objects.get(code="1200")  # Inventory
+                accounts_payable = Account.objects.get(code="2000")  # Accounts Payable
 
                 journal_entry = JournalEntry.objects.create(
                     description=f"Adjustment for purchase update #{purchase.id} {purchase}"
@@ -149,11 +156,11 @@ class PurchaseUpdateAPIView(APIView):
                             description="Accounts payable decrease from purchase update",
                         )
 
-                return Response({"message": "Purchase updated and adjustment journal entry recorded."}, status=status.HTTP_200_OK)
+                return Response({"message": "Purchase updated and adjustment journal entry recorded."},
+                                status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class PurchaseCreateUpdateFromCSVAPIView(APIView):
@@ -177,8 +184,12 @@ class PurchaseCreateUpdateFromCSVAPIView(APIView):
                     product_name = row["product_name"]
                     quantity = int(row["quantity"])
                     price_per_unit = Decimal(row["price_per_unit"])
+                    currency_code=row.get("currency")
+                    currency_code = currency_code if pd.notna(currency_code) else settings.ACCOUNTING_CURRENCY
+                    currency=Currency.objects.filter(code=currency_code).first()
                     purchase_date = row.get("purchase_date")
-                    purchase_datetime = timezone.datetime.strptime(purchase_date, "%Y-%m-%d") if pd.notna(purchase_date) else timezone.now()
+                    purchase_datetime = timezone.datetime.strptime(purchase_date, "%Y-%m-%d") if pd.notna(
+                        purchase_date) else timezone.now()
 
                     product = Product.objects.filter(name__iexact=product_name).first()
                     if not product:
@@ -188,6 +199,7 @@ class PurchaseCreateUpdateFromCSVAPIView(APIView):
                         product=product,
                         quantity=quantity,
                         price_per_unit=price_per_unit,
+                        currency=currency,
                         purchase_datetime=purchase_datetime,
                     )
 
