@@ -23,6 +23,7 @@ class Order(models.Model):
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    currency = models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         # Assuming Customer model has a related 'user' with a username

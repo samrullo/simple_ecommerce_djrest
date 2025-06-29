@@ -25,6 +25,7 @@ from .viewsets.accounting.viewsets import (
     JournalEntryLineViewSet,
 )
 from .viewsets.product.viewsets import ProductCreationAPIView,ProductUpdateAPIView,ProductCreateUpdateFromCSVAPIView
+from ecommerce.viewsets.order.viewsets import OrderCreateAPIView
 from ecommerce.viewsets.product.viewsets import CurrencyViewSet,FXRateViewSet
 
 router = DefaultRouter()
@@ -59,5 +60,6 @@ urlpatterns = [
     path("v1/create-update-products-from-csv/",ProductCreateUpdateFromCSVAPIView.as_view(),name="create_update_products_from_csv"),
     path("v1/create-purchase/",PurchaseCreateAPIView.as_view(),name="create-purchase"),
     path("v1/update-purchase/<int:pk>/",PurchaseUpdateAPIView.as_view(),name="update-purchase"),
-    path("v1/create-update-purchases-from-csv/",PurchaseCreateUpdateFromCSVAPIView.as_view(),name="create_update_purchases_from_csv")
+    path("v1/create-update-purchases-from-csv/",PurchaseCreateUpdateFromCSVAPIView.as_view(),name="create_update_purchases_from_csv"),
+    path("v1/create-order/",OrderCreateAPIView.as_view(),name="create_order")
 ]
