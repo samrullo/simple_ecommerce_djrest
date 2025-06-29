@@ -67,7 +67,6 @@ def convert_price(price, from_code, to_code, fx_rates: dict):
     return price * rate
 
 
-# TODO : build Order react component that allows user to add products to shopping cart and sends request to create order
 class OrderCreateAPIView(APIView):
     def post(self, request):
         try:
