@@ -1,0 +1,31 @@
+# Git
+.git
+.gitignore
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# Python
+.python-version
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# IDE
+.idea
+
+# Caches
+.ruff_cache
+
+# Logs
+django_debug.log
+
+# Database
+db.sqlite3
+
+# Media
+media/
