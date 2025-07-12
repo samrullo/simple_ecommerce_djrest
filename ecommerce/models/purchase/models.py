@@ -14,4 +14,4 @@ class Purchase(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.product.name} - {self.quantity} pcs at {self.price_per_unit}"
+        return f"{self.product.name} - {self.quantity} units at {self.price_per_unit}"

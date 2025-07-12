@@ -9,3 +9,5 @@ requests
 pillow
 ipython
 sqlalchemy
+gunicorn
+psycopg2-binary

@@ -42,6 +42,10 @@ def journal_entries_for_direct_inventory_changes(
     """
     Adjusts inventory using new model and creates journal entries for direct inventory change.
     This function assumes a virtual purchase for direct admin inventory edits.
+    :param product:
+    :param new_quantity:
+    :param inventory_account_code:
+    :param accounts_payable_account_code:
     :return: list of Inventory objects created or adjusted
     """
     previous_quantity = sum(inv.stock for inv in Inventory.objects.filter(product=product))
@@ -84,14 +88,14 @@ def journal_entries_for_direct_inventory_changes(
             account=inventory_account,
             debit=delta_value,
             credit=0,
-            description=f"Inventory added for {product.name}"
+            description=f"Inventory added for {product.name} at a price of {product.price}"
         )
         JournalEntryLine.objects.create(
             journal_entry=journal_entry,
             account=accounts_payable,
             debit=0,
             credit=delta_value,
-            description="Accounts Payable for inventory increase"
+            description=f"Accounts Payable for inventory increase {product.name} at a price of {product.price}"
         )
         logger.debug(f"Increased inventory of {product} by {quantity_diff}")
         return [inventory_record]
@@ -123,14 +127,14 @@ def journal_entries_for_direct_inventory_changes(
                 account=inventory_account,
                 debit=0,
                 credit=cost,
-                description=f"Inventory decrease from batch ({inv.purchase.id})"
+                description=f"Inventory decrease from batch ({inv.purchase})"
             )
             JournalEntryLine.objects.create(
                 journal_entry=journal_entry,
                 account=accounts_payable,
                 debit=cost,
                 credit=0,
-                description="Reversal from Accounts Payable"
+                description=f"Reversal from Accounts Payable as part of inventory descrease from batch {inv.purchase}"
             )
 
         if remaining_qty > 0:
@@ -156,7 +160,7 @@ def journal_entry_when_product_is_sold_fifo(product: Product, quantity_sold: int
     total_cost = Decimal("0")
 
     journal_entry = JournalEntry.objects.create(
-        description=f"FIFO COGS for sale of {quantity_sold} x {product.name}"
+        description=f"FIFO COGS for sale of {quantity_sold} x {product.name} at {product.price}"
     )
 
     for inventory in inventory_batches:
@@ -177,14 +181,14 @@ def journal_entry_when_product_is_sold_fifo(product: Product, quantity_sold: int
             account=cogs_account,
             debit=cost,
             credit=0,
-            description=f"COGS ({take_qty} pcs from purchase at {inventory.purchase.price_per_unit})"
+            description=f"COGS ({take_qty} units from purchase {inventory.purchase} at {inventory.purchase.price_per_unit})"
         )
         JournalEntryLine.objects.create(
             journal_entry=journal_entry,
             account=inventory_account,
             debit=0,
             credit=cost,
-            description="Inventory reduction (FIFO)"
+            description=f"Inventory reduction (FIFO) as part of selling {take_qty} units of {inventory.purchase}"
         )
 
         remaining_qty -= take_qty

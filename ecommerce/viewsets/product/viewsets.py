@@ -80,15 +80,18 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     permission_classes = [IsStaffOrReadOnly]
 
+
 # views.py
 
 from rest_framework.generics import ListAPIView
 from ecommerce.models.product.models import Product
 from ecommerce.serializers.product.serializers import ProductWithImageSerializer
 
+
 class ProductWithImageListView(ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductWithImageSerializer
+
 
 class ProductImageViewset(viewsets.ModelViewSet):
     queryset = ProductImage.objects.all()
@@ -125,7 +128,7 @@ def make_new_product(name, description, category: Category, sku, brand: Brand = 
     :param product_image:
     :return:
     """
-    product= Product.objects.create(
+    product = Product.objects.create(
         name=name,
         description=description,
         sku=sku,
@@ -174,12 +177,14 @@ def add_or_update_product(category_name: str,
         if product_sku:
             product.sku = product_sku
         if product_image:
-            product_image_obj = ProductImage.objects.filter(product=product,tag="icon").first()
+            product_image_obj = ProductImage.objects.filter(product=product, tag="icon").first()
             if product_image_obj is None:
-                ProductImage.objects.create(product=product,tag="icon",image=product_image)
+                ProductImage.objects.create(product=product, tag="icon", image=product_image)
             else:
                 product_image_obj.image = product_image
                 product_image_obj.save()
+        if category:
+            product.category = category
         if brand:
             product.brand = brand
         # updated at now

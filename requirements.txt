@@ -11,8 +11,6 @@ certifi==2025.1.31
     # via requests
 charset-normalizer==3.4.1
     # via requests
-colorama==0.4.6
-    # via ipython
 decorator==5.1.1
     # via ipython
 dj-rest-auth==7.0.1
@@ -38,8 +36,8 @@ djangorestframework-simplejwt==5.4.0
     # via -r requirements.in
 executing==2.2.0
     # via stack-data
-greenlet==3.1.1
-    # via sqlalchemy
+gunicorn==23.0.0
+    # via -r requirements.in
 idna==3.10
     # via requests
 ipython==8.32.0
@@ -50,14 +48,22 @@ matplotlib-inline==0.1.7
     # via ipython
 numpy==2.2.2
     # via pandas
+packaging==25.0
+    # via gunicorn
 pandas==2.2.3
     # via -r requirements.in
 parso==0.8.4
     # via jedi
+pexpect==4.9.0
+    # via ipython
 pillow==11.1.0
     # via -r requirements.in
 prompt-toolkit==3.0.50
     # via ipython
+psycopg2-binary==2.9.10
+    # via -r requirements.in
+ptyprocess==0.7.0
+    # via pexpect
 pure-eval==0.2.3
     # via stack-data
 pygments==2.19.1
@@ -85,9 +91,7 @@ traitlets==5.14.3
 typing-extensions==4.12.2
     # via sqlalchemy
 tzdata==2025.1
-    # via
-    #   django
-    #   pandas
+    # via pandas
 urllib3==2.3.0
     # via requests
 wcwidth==0.2.13
