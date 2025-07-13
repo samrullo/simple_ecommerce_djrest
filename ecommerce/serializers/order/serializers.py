@@ -19,7 +19,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
     def get_product_image(self, obj):
         icon_image = obj.product.images.filter(tag="icon").first()
-        if icon_image:
+        if icon_image and icon_image.image and hasattr(icon_image.image, "url"):
             request = self.context.get("request")
             if request:
                 return request.build_absolute_uri(icon_image.image.url)
