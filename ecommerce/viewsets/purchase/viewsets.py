@@ -308,7 +308,7 @@ class PurchaseDetailByDateAPIView(generics.ListAPIView):
     permission_classes = [IsStaff]
 
     def get_queryset(self):
-        date_str = self.request.query_params.get("purchase_date")
+        date_str = self.kwargs.get("purchase_date")
         if not date_str:
             return Purchase.objects.none()
 
@@ -317,6 +317,4 @@ class PurchaseDetailByDateAPIView(generics.ListAPIView):
         except ValueError:
             return Purchase.objects.none()
 
-        return Purchase.objects.filter(purchase_datetime__date=date_obj).order_by(
-            "purchase_datetime"
-        )
+        return Purchase.objects.filter(purchase_datetime__date=date_obj).order_by("purchase_datetime")

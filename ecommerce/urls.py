@@ -86,7 +86,7 @@ urlpatterns = [
         name="purchases_summary_by_date",
     ),
     path(
-        "v1/purchases-by-date/",
+        "v1/purchases-by-date/<str:purchase_date>",
         PurchaseDetailByDateAPIView.as_view(),
         name="purchases_by_date",
     ),
