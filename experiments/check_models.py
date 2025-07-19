@@ -1,5 +1,4 @@
 import os
-import logging
 import django
 
 # Set the path to your settings module
@@ -10,5 +9,5 @@ django.setup()
 
 from ecommerce.models.inventory.models import Inventory
 
-inventories=Inventory.objects.all()
+inventories = Inventory.objects.all()
 print(f"inventories : {len(inventories)}")

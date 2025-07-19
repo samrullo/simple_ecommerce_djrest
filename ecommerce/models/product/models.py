@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from ecommerce.models.users.models import Customer
 
+
 class Currency(models.Model):
     code = models.CharField(max_length=3, unique=True)  # e.g., 'USD', 'JPY'
     name = models.CharField(max_length=32)
@@ -14,8 +15,12 @@ class Currency(models.Model):
 
 
 class FXRate(models.Model):
-    currency_from = models.ForeignKey(Currency, related_name='fx_from', on_delete=models.CASCADE)
-    currency_to = models.ForeignKey(Currency, related_name='fx_to', on_delete=models.CASCADE)
+    currency_from = models.ForeignKey(
+        Currency, related_name="fx_from", on_delete=models.CASCADE
+    )
+    currency_to = models.ForeignKey(
+        Currency, related_name="fx_to", on_delete=models.CASCADE
+    )
     rate = models.DecimalField(max_digits=20, decimal_places=6)
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
@@ -86,10 +91,17 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+
 class ProductImage(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='product_images/')
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to="product_images/")
     tag = models.CharField(max_length=50)  # e.g., 'icon', 'thumbnail','main', etc.
+
+    def __str__(self):
+        return self.product.name
+
 
 class ProductPrice(models.Model):
     """
@@ -98,8 +110,10 @@ class ProductPrice(models.Model):
 
     product = models.ForeignKey(Product, related_name="price", on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    discount_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    currency = models.ForeignKey(Currency,on_delete=models.SET_NULL,null=True)
+    discount_price = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True
+    )
+    currency = models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True)
 
     begin_date = models.DateField(default=timezone.now)
     end_date = models.DateField(blank=True, null=True)
@@ -110,7 +124,7 @@ class ProductPrice(models.Model):
             models.UniqueConstraint(
                 fields=["product"],
                 condition=models.Q(end_date__isnull=True),
-                name="only_one_active_price_per_product"
+                name="only_one_active_price_per_product",
             )
         ]
 

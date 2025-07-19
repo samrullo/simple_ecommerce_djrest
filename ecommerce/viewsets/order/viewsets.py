@@ -17,7 +17,9 @@ from ecommerce.models.order.models import Order, OrderItem, Payment
 from ecommerce.models.product.models import Product, ProductPrice
 from ecommerce.models.users.models import Customer
 from ecommerce.models.accounting.models import Account
-from ecommerce.viewsets.accounting.viewsets import journal_entry_when_product_is_sold_fifo
+from ecommerce.viewsets.accounting.viewsets import (
+    journal_entry_when_product_is_sold_fifo,
+)
 from ecommerce.models.accounting.models import JournalEntry, JournalEntryLine
 
 
@@ -38,7 +40,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         order = get_object_or_404(Order, pk=pk)
 
         if not user.is_staff and not user.is_superuser and order.customer.user != user:
-            return Response({"detail": "Not authorized."}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "Not authorized."}, status=status.HTTP_403_FORBIDDEN
+            )
 
         serializer = OrderWithItemsSerializer(order)
         return Response(serializer.data)
@@ -54,8 +58,6 @@ class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
     permission_classes = [permissions.IsAdminUser]
-
-
 
 
 def convert_price(price, from_code, to_code, fx_rates: dict):
@@ -75,7 +77,10 @@ class OrderCreateAPIView(APIView):
             user = request.user
 
             if not user.is_authenticated:
-                return Response({"error": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response(
+                    {"error": "Authentication required."},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
 
             customer = get_object_or_404(Customer, user=user)
             base_currency_code = request.data.get("base_currency")  # e.g., "JPY"
@@ -86,7 +91,12 @@ class OrderCreateAPIView(APIView):
             }
 
             with transaction.atomic():
-                order = Order.objects.create(customer=customer, status="pending", total_amount=Decimal("0.00"),currency=base_currency)
+                order = Order.objects.create(
+                    customer=customer,
+                    status="pending",
+                    total_amount=Decimal("0.00"),
+                    currency=base_currency,
+                )
                 total_amount = Decimal("0.00")
                 journal_lines = []
 
@@ -97,13 +107,21 @@ class OrderCreateAPIView(APIView):
                         raise ValueError("Quantity must be positive.")
 
                     product = get_object_or_404(Product, id=product_id)
-                    active_price = ProductPrice.objects.filter(product=product, end_date__isnull=True).first()
+                    active_price = ProductPrice.objects.filter(
+                        product=product, end_date__isnull=True
+                    ).first()
 
                     if not active_price:
-                        raise ValueError(f"No active price found for product {product.name}")
+                        raise ValueError(
+                            f"No active price found for product {product.name}"
+                        )
 
-                    converted_price = convert_price(active_price.price, active_price.currency.code, base_currency.code,
-                                                    fx_rates)
+                    converted_price = convert_price(
+                        active_price.price,
+                        active_price.currency.code,
+                        base_currency.code,
+                        fx_rates,
+                    )
                     line_total = converted_price * quantity
                     total_amount += line_total
 
@@ -112,10 +130,12 @@ class OrderCreateAPIView(APIView):
                         product=product,
                         quantity=quantity,
                         price=active_price.price,
-                        currency=active_price.currency
+                        currency=active_price.currency,
                     )
 
-                    cost = journal_entry_when_product_is_sold_fifo(product=product, quantity_sold=quantity)
+                    cost = journal_entry_when_product_is_sold_fifo(
+                        product=product, quantity_sold=quantity
+                    )
                     # Optionally accumulate cost if needed
 
                 # Save total amount on order
@@ -143,14 +163,14 @@ class OrderCreateAPIView(APIView):
                     account=cash_account,
                     debit=total_amount,
                     credit=Decimal("0.00"),
-                    description="Cash or receivable from sale"
+                    description="Cash or receivable from sale",
                 )
                 JournalEntryLine.objects.create(
                     journal_entry=journal_entry,
                     account=income_account,
                     debit=Decimal("0.00"),
                     credit=total_amount,
-                    description="Sales income"
+                    description="Sales income",
                 )
 
                 # Save journal lines from inventory changes
@@ -158,8 +178,10 @@ class OrderCreateAPIView(APIView):
                     line.journal_entry = journal_entry
                     line.save()
 
-                return Response({"message": "Order created successfully.", "order_id": order.id},
-                                status=status.HTTP_201_CREATED)
+                return Response(
+                    {"message": "Order created successfully.", "order_id": order.id},
+                    status=status.HTTP_201_CREATED,
+                )
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

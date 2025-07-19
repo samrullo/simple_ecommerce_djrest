@@ -3,10 +3,7 @@ import traceback
 import pandas as pd
 from django.utils import timezone
 from django.conf import settings
-from rest_framework import permissions
 from rest_framework.views import APIView
-from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from typing import List
 from decimal import Decimal
 from django.db import transaction
@@ -29,7 +26,10 @@ from ecommerce.models import (
     Wishlist,
 )
 from ecommerce.models.product.models import Currency, FXRate
-from ecommerce.serializers.product.serializers import CurrencySerializer, FXRateSerializer
+from ecommerce.serializers.product.serializers import (
+    CurrencySerializer,
+    FXRateSerializer,
+)
 from ecommerce.serializers import (
     CategorySerializer,
     BrandSerializer,
@@ -40,7 +40,9 @@ from ecommerce.serializers import (
     ProductReviewSerializer,
     WishlistSerializer,
 )
-from ecommerce.viewsets.accounting.viewsets import journal_entries_for_direct_inventory_changes
+from ecommerce.viewsets.accounting.viewsets import (
+    journal_entries_for_direct_inventory_changes,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +119,9 @@ class WishlistViewSet(viewsets.ModelViewSet):
     permission_classes = [IsStaffOrReadOnly]
 
 
-def make_new_product(name, description, category: Category, sku, brand: Brand = None, product_image=None) -> Product:
+def make_new_product(
+    name, description, category: Category, sku, brand: Brand = None, product_image=None
+) -> Product:
     """
     Make new product
     :param name:
@@ -139,15 +143,18 @@ def make_new_product(name, description, category: Category, sku, brand: Brand = 
     return product
 
 
-def add_or_update_product(category_name: str,
-                          brand_name: str = None,
-                          tag_names: List[str] = None,
-                          pk: int = None,
-                          product_name: str = None,
-                          product_description: str = None,
-                          product_sku: str = None,
-                          product_image=None) -> Product:
-    """
+def add_or_update_product(
+    category_name: str,
+    brand_name: str = None,
+    tag_names: List[str] = None,
+    pk: int = None,
+    product_name: str = None,
+    product_description: str = None,
+    product_sku: str = None,
+    product_image=None,
+) -> Product:
+    (
+        """
     
     :param category_name: 
     :param brand_name: 
@@ -158,7 +165,9 @@ def add_or_update_product(category_name: str,
     :param product_sku: 
     :param product_image: 
     :return: 
-    """""
+    """
+        ""
+    )
     # category
     category, _ = Category.objects.get_or_create(name=category_name)
 
@@ -177,9 +186,13 @@ def add_or_update_product(category_name: str,
         if product_sku:
             product.sku = product_sku
         if product_image:
-            product_image_obj = ProductImage.objects.filter(product=product, tag="icon").first()
+            product_image_obj = ProductImage.objects.filter(
+                product=product, tag="icon"
+            ).first()
             if product_image_obj is None:
-                ProductImage.objects.create(product=product, tag="icon", image=product_image)
+                ProductImage.objects.create(
+                    product=product, tag="icon", image=product_image
+                )
             else:
                 product_image_obj.image = product_image
                 product_image_obj.save()
@@ -192,7 +205,14 @@ def add_or_update_product(category_name: str,
         product.save()
 
     else:
-        product = make_new_product(product_name, product_description, category, product_sku, brand, product_image)
+        product = make_new_product(
+            product_name,
+            product_description,
+            category,
+            product_sku,
+            brand,
+            product_image,
+        )
 
     # Tags
     if tag_names:
@@ -201,7 +221,9 @@ def add_or_update_product(category_name: str,
     return product
 
 
-def add_or_update_product_price(product: Product, price: str | int | float, currency_code: str):
+def add_or_update_product_price(
+    product: Product, price: str | int | float, currency_code: str
+):
     """
     Create or update product price
     :param product:
@@ -212,7 +234,9 @@ def add_or_update_product_price(product: Product, price: str | int | float, curr
     try:
         currency_obj = Currency.objects.filter(code=currency_code).first()
         new_price = Decimal(price)
-        active_price = ProductPrice.objects.filter(product=product, end_date__isnull=True).first()
+        active_price = ProductPrice.objects.filter(
+            product=product, end_date__isnull=True
+        ).first()
 
         if active_price:
             active_price.price = new_price
@@ -224,7 +248,7 @@ def add_or_update_product_price(product: Product, price: str | int | float, curr
                 price=new_price,
                 currency=currency_obj,
                 begin_date=timezone.now().date(),
-                end_date=None
+                end_date=None,
             )
     except Exception as e:
         logger.debug(f"Price update error: {e}")
@@ -248,24 +272,30 @@ class ProductCreationAPIView(APIView):
                             category_name : {category_name},
                             brand_name : {brand_name},
                             tag_names : {tag_names},
-                            name : {request.data.get('name')},
-                            description : {request.data.get('description')},
-                            sku : {request.data.get('sku')},
-                            image : {request.data.get('image')}
+                            name : {request.data.get("name")},
+                            description : {request.data.get("description")},
+                            sku : {request.data.get("sku")},
+                            image : {request.data.get("image")}
                             """)
-                product = add_or_update_product(category_name,
-                                                brand_name,
-                                                tag_names,
-                                                product_name=request.data.get("name"),
-                                                product_description=request.data.get("description", ""),
-                                                product_sku=request.data.get("sku"),
-                                                product_image=request.data.get("image"))
+                product = add_or_update_product(
+                    category_name,
+                    brand_name,
+                    tag_names,
+                    product_name=request.data.get("name"),
+                    product_description=request.data.get("description", ""),
+                    product_sku=request.data.get("sku"),
+                    product_image=request.data.get("image"),
+                )
                 # Price
-                add_or_update_product_price(product, request.data.get("price"), request.data.get("currency"))
+                add_or_update_product_price(
+                    product, request.data.get("price"), request.data.get("currency")
+                )
 
                 # Inventory
                 quantity = int(request.data.get("stock", 1))
-                journal_entries_for_direct_inventory_changes(product, quantity, "1200", "2000")
+                journal_entries_for_direct_inventory_changes(
+                    product, quantity, "1200", "2000"
+                )
                 return Response(
                     {"message": "Product created", "product_id": product.id},
                     status=status.HTTP_201_CREATED,
@@ -282,37 +312,50 @@ class ProductUpdateAPIView(APIView):
     def put(self, request, pk):
         try:
             with transaction.atomic():
-                tag_names = [t.strip() for t in request.data.get("tags", "").split(",") if t.strip()]
-                logger.debug(f"""Passing category_name : {request.data.get('category_name')},
-                brand_name : {request.data.get('brand_name')},
+                tag_names = [
+                    t.strip()
+                    for t in request.data.get("tags", "").split(",")
+                    if t.strip()
+                ]
+                logger.debug(f"""Passing category_name : {request.data.get("category_name")},
+                brand_name : {request.data.get("brand_name")},
                 tag_names : {tag_names},
                 pk : {pk},
-                name : {request.data.get('name')},
-                description : {request.data.get('description')},
-                sku : {request.data.get('sku')},
-                product_image : {request.FILES.get('image')}
+                name : {request.data.get("name")},
+                description : {request.data.get("description")},
+                sku : {request.data.get("sku")},
+                product_image : {request.FILES.get("image")}
                                 """)
-                product = add_or_update_product(request.data.get("category_name"),
-                                                request.data.get("brand_name"),
-                                                tag_names,
-                                                pk,
-                                                request.data.get("name"),
-                                                request.data.get("description"),
-                                                request.data.get("sku"),
-                                                product_image=request.FILES.get("image"))
+                product = add_or_update_product(
+                    request.data.get("category_name"),
+                    request.data.get("brand_name"),
+                    tag_names,
+                    pk,
+                    request.data.get("name"),
+                    request.data.get("description"),
+                    request.data.get("sku"),
+                    product_image=request.FILES.get("image"),
+                )
 
                 # --- Price update ---
                 if "price" in request.data:
-                    add_or_update_product_price(product, request.data.get("price"), request.data.get("currency"))
+                    add_or_update_product_price(
+                        product, request.data.get("price"), request.data.get("currency")
+                    )
                 # --- Stock update + journal ---
                 if "stock" in request.data:
                     try:
                         new_quantity = int(request.data["stock"])
-                        journal_entries_for_direct_inventory_changes(product, new_quantity, "1200", "2000")
+                        journal_entries_for_direct_inventory_changes(
+                            product, new_quantity, "1200", "2000"
+                        )
                     except Exception as e:
                         logger.debug(f"Inventory update error: {e}")
 
-                return Response({"message": "Product updated successfully"}, status=status.HTTP_200_OK)
+                return Response(
+                    {"message": "Product updated successfully"},
+                    status=status.HTTP_200_OK,
+                )
         except Exception as e:
             logger.debug("Traceback:", traceback.format_exc())
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -326,13 +369,19 @@ class ProductCreateUpdateFromCSVAPIView(APIView):
         try:
             file_obj = request.FILES.get("file")
             if not file_obj:
-                return Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST
+                )
             df = pd.read_csv(file_obj)
             required_cols = ["product_name", "category_name", "price", "stock"]
             missing_cols = get_list_diff(required_cols, df.columns)
             if len(missing_cols) > 0:
-                return Response({"error": f"Product Create and Update CSV file is missing columns : {missing_cols}"},
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        "error": f"Product Create and Update CSV file is missing columns : {missing_cols}"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             for i, row in df.iterrows():
                 with transaction.atomic():
@@ -345,7 +394,9 @@ class ProductCreateUpdateFromCSVAPIView(APIView):
                         brand_name = row["brand_name"]
                     else:
                         brand_name = None
-                    existing_product = Product.objects.filter(name__iexact=row["product_name"]).first()
+                    existing_product = Product.objects.filter(
+                        name__iexact=row["product_name"]
+                    ).first()
                     if existing_product:
                         pk = existing_product.pk
                     else:
@@ -363,17 +414,35 @@ class ProductCreateUpdateFromCSVAPIView(APIView):
                         sku = existing_product.sku
                     else:
                         sku = row["product_name"].upper()
-                    product = add_or_update_product(row["category_name"], brand_name, tag_names, pk,
-                                                    row["product_name"], description, sku)
+                    product = add_or_update_product(
+                        row["category_name"],
+                        brand_name,
+                        tag_names,
+                        pk,
+                        row["product_name"],
+                        description,
+                        sku,
+                    )
                     currency_code = row.get("currency")
-                    currency_code = currency_code if pd.notna(currency_code) else settings.ACCOUNTING_CURRENCY
+                    currency_code = (
+                        currency_code
+                        if pd.notna(currency_code)
+                        else settings.ACCOUNTING_CURRENCY
+                    )
                     add_or_update_product_price(product, row["price"], currency_code)
-                    journal_entries_for_direct_inventory_changes(product, row["stock"], "1200", "2000")
+                    journal_entries_for_direct_inventory_changes(
+                        product, row["stock"], "1200", "2000"
+                    )
                 logger.debug(
-                    f"Finished creating or updating product with name : {row['product_name']}, category_name : {row['category_name']},brand_name : {brand_name}, tag_names : {tag_names}, price :{row['price']}, stock : {row['stock']}")
-            return Response({"message": f"Successfully created or updated {len(df)} products"},
-                            status=status.HTTP_200_OK)
+                    f"Finished creating or updating product with name : {row['product_name']}, category_name : {row['category_name']},brand_name : {brand_name}, tag_names : {tag_names}, price :{row['price']}, stock : {row['stock']}"
+                )
+            return Response(
+                {"message": f"Successfully created or updated {len(df)} products"},
+                status=status.HTTP_200_OK,
+            )
         except Exception as e:
             logger.debug("Traceback:", traceback.format_exc())
-            return Response({"error": f"Product create or update from csv failed : {e}"},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": f"Product create or update from csv failed : {e}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

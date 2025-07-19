@@ -1,7 +1,6 @@
 import logging
 from rest_framework import viewsets, permissions
-from rest_framework.exceptions import NotFound
-from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
+from allauth.account.models import EmailConfirmationHMAC
 
 from ecommerce.models import Customer, Address, Role, Staff
 from ecommerce.serializers import (
@@ -10,7 +9,6 @@ from ecommerce.serializers import (
     RoleSerializer,
     StaffSerializer,
 )
-from dj_rest_auth.registration.views import VerifyEmailView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -64,23 +62,27 @@ class CustomVerifyEmailView(APIView):
                 logger.debug("Invalid or expired email confirmation key")
                 return Response(
                     {"detail": "Invalid or expired confirmation link."},
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
 
             email_address = confirmation.email_address
             if email_address.verified:
                 logger.debug(f"Email already verified: {email_address.email}")
-                return Response({"detail": "Email is already verified."}, status=status.HTTP_200_OK)
+                return Response(
+                    {"detail": "Email is already verified."}, status=status.HTTP_200_OK
+                )
 
             confirmation.confirm(request)
             logger.debug(f"Email marked as verified for: {email_address.email}")
-            return Response({"detail": "Email successfully verified."}, status=status.HTTP_200_OK)
+            return Response(
+                {"detail": "Email successfully verified."}, status=status.HTTP_200_OK
+            )
 
         except Exception as e:
             logger.exception("Unexpected error during email confirmation")
             return Response(
                 {"detail": f"Unexpected error during confirmation: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 

@@ -8,13 +8,20 @@ from .viewsets.user.viewsets import (
 )
 from .viewsets.order.viewsets import OrderViewSet, OrderItemViewSet, PaymentViewSet
 from .viewsets.inventory.viewsets import InventoryViewSet
-from .viewsets.purchase.viewsets import PurchaseViewSet, PurchaseCreateAPIView, PurchaseUpdateAPIView,PurchaseCreateUpdateFromCSVAPIView
+from .viewsets.purchase.viewsets import (
+    PurchaseViewSet,
+    PurchaseCreateAPIView,
+    PurchaseUpdateAPIView,
+    PurchaseCreateUpdateFromCSVAPIView,
+    PurchaseSummaryByDateAPIView,
+    PurchaseDetailByDateAPIView,
+)
 from .viewsets.product.viewsets import (
     CategoryViewSet,
     BrandViewSet,
     TagViewSet,
     ProductViewSet,
-ProductWithImageListView,
+    ProductWithImageListView,
     ProductPriceViewSet,
     ProductReviewViewSet,
     WishlistViewSet,
@@ -24,20 +31,24 @@ from .viewsets.accounting.viewsets import (
     JournalEntryViewSet,
     JournalEntryLineViewSet,
 )
-from .viewsets.product.viewsets import ProductCreationAPIView,ProductUpdateAPIView,ProductCreateUpdateFromCSVAPIView
+from .viewsets.product.viewsets import (
+    ProductCreationAPIView,
+    ProductUpdateAPIView,
+    ProductCreateUpdateFromCSVAPIView,
+)
 from ecommerce.viewsets.order.viewsets import OrderCreateAPIView
-from ecommerce.viewsets.product.viewsets import CurrencyViewSet,FXRateViewSet
+from ecommerce.viewsets.product.viewsets import CurrencyViewSet, FXRateViewSet
 
 router = DefaultRouter()
 router.register(r"categories", CategoryViewSet, basename="category")
 router.register(r"brands", BrandViewSet, basename="brand")
 router.register(r"tags", TagViewSet, basename="tag")
-router.register(r"currencies",CurrencyViewSet,basename="currency")
-router.register(r"fxrates",FXRateViewSet,basename="fxrate")
+router.register(r"currencies", CurrencyViewSet, basename="currency")
+router.register(r"fxrates", FXRateViewSet, basename="fxrate")
 router.register(r"products", ProductViewSet, basename="product")
 router.register(r"product-prices", ProductPriceViewSet, basename="product-price")
 router.register(r"inventories", InventoryViewSet, basename="inventory")
-router.register(r'purchases', PurchaseViewSet, basename='purchase')
+router.register(r"purchases", PurchaseViewSet, basename="purchase")
 router.register(r"orders", OrderViewSet, basename="order")
 router.register(r"order-items", OrderItemViewSet, basename="order-item")
 router.register(r"payments", PaymentViewSet, basename="payment")
@@ -51,15 +62,46 @@ router.register(r"accounts", AccountViewSet)
 router.register(r"journal-entries", JournalEntryViewSet)
 router.register(r"journal-entry-lines", JournalEntryLineViewSet)
 
-
 urlpatterns = [
     path("v1/", include(router.urls)),
-    path("v1/products-with-images/",ProductWithImageListView.as_view(),name="products-with-images"),
-    path("v1/create-product/",ProductCreationAPIView.as_view(),name="create-product"),
-    path("v1/update-product/<int:pk>/",ProductUpdateAPIView.as_view(),name="update-product"),
-    path("v1/create-update-products-from-csv/",ProductCreateUpdateFromCSVAPIView.as_view(),name="create_update_products_from_csv"),
-    path("v1/create-purchase/",PurchaseCreateAPIView.as_view(),name="create-purchase"),
-    path("v1/update-purchase/<int:pk>/",PurchaseUpdateAPIView.as_view(),name="update-purchase"),
-    path("v1/create-update-purchases-from-csv/",PurchaseCreateUpdateFromCSVAPIView.as_view(),name="create_update_purchases_from_csv"),
-    path("v1/create-order/",OrderCreateAPIView.as_view(),name="create_order")
+    path(
+        "v1/products-with-images/",
+        ProductWithImageListView.as_view(),
+        name="products-with-images",
+    ),
+    path("v1/create-product/", ProductCreationAPIView.as_view(), name="create-product"),
+    path(
+        "v1/update-product/<int:pk>/",
+        ProductUpdateAPIView.as_view(),
+        name="update-product",
+    ),
+    path(
+        "v1/create-update-products-from-csv/",
+        ProductCreateUpdateFromCSVAPIView.as_view(),
+        name="create_update_products_from_csv",
+    ),
+    path(
+        "v1/purchases-summary-by-date/",
+        PurchaseSummaryByDateAPIView.as_view(),
+        name="purchases_summary_by_date",
+    ),
+    path(
+        "v1/purchases-by-date/",
+        PurchaseDetailByDateAPIView.as_view(),
+        name="purchases_by_date",
+    ),
+    path(
+        "v1/create-purchase/", PurchaseCreateAPIView.as_view(), name="create-purchase"
+    ),
+    path(
+        "v1/update-purchase/<int:pk>/",
+        PurchaseUpdateAPIView.as_view(),
+        name="update-purchase",
+    ),
+    path(
+        "v1/create-update-purchases-from-csv/",
+        PurchaseCreateUpdateFromCSVAPIView.as_view(),
+        name="create_update_purchases_from_csv",
+    ),
+    path("v1/create-order/", OrderCreateAPIView.as_view(), name="create_order"),
 ]

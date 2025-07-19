@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ecommerce', '0001_initial'),
+        ("ecommerce", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='fxrate',
-            name='end_date',
+            model_name="fxrate",
+            name="end_date",
             field=models.DateField(blank=True, null=True),
         ),
     ]

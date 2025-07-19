@@ -1,20 +1,27 @@
 from rest_framework import serializers
-from ecommerce.models.product.models import Currency
 from ecommerce.models import OrderItem, Order, Payment
-from ecommerce.serializers.product.serializers import ProductSerializer,CurrencySerializer
+from ecommerce.serializers.product.serializers import (
+    CurrencySerializer,
+)
 from ecommerce.serializers.user.serializers import CustomerSerializer
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source="product.name", read_only=True)
     product_image = serializers.SerializerMethodField()
-    currency=CurrencySerializer()
+    currency = CurrencySerializer()
 
     class Meta:
         model = OrderItem
         fields = [
-            "id", "order", "product", "product_name", "product_image",
-            "quantity", "price", "currency"
+            "id",
+            "order",
+            "product",
+            "product_name",
+            "product_image",
+            "quantity",
+            "price",
+            "currency",
         ]
 
     def get_product_image(self, obj):
@@ -26,6 +33,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
             return icon_image.image.url
         return None
 
+
 class OrderWithItemsSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     customer = CustomerSerializer(read_only=True)
@@ -34,6 +42,7 @@ class OrderWithItemsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = "__all__"
+
 
 class OrderSerializer(serializers.ModelSerializer):
     # Include the list of order items (read-only).

@@ -5,15 +5,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ecommerce', '0002_alter_fxrate_end_date'),
+        ("ecommerce", "0002_alter_fxrate_end_date"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='orderitem',
-            name='currency',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='ecommerce.currency'),
+            model_name="orderitem",
+            name="currency",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="ecommerce.currency",
+            ),
         ),
     ]

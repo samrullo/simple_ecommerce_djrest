@@ -5,9 +5,6 @@ from ecommerce.models import Customer, Address, Role, Staff
 from django.contrib.auth import get_user_model
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.account.models import EmailConfirmation
-from allauth.account.utils import user_email, user_field
-from django.conf import settings
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +31,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         try:
             customer_obj = obj.customer  # should work if a Customer exists
             return CustomerSerializer(customer_obj).data
-        except Exception as e:
+        except Exception:
             return None
 
     class Meta:
@@ -119,7 +116,9 @@ class CustomAccountAdapter(DefaultAccountAdapter):
 
         return user
 
-    def send_confirmation_mail(self, request, emailconfirmation: EmailConfirmation, signup):
+    def send_confirmation_mail(
+        self, request, emailconfirmation: EmailConfirmation, signup
+    ):
         """
         Override the confirmation link sent in the email.
         """
@@ -135,7 +134,11 @@ class CustomAccountAdapter(DefaultAccountAdapter):
             "current_site": None,
             "key": emailconfirmation.key,
         }
-        self.send_mail("account/email/email_confirmation", emailconfirmation.email_address.email, ctx)
+        self.send_mail(
+            "account/email/email_confirmation",
+            emailconfirmation.email_address.email,
+            ctx,
+        )
 
     # def confirm_email(self, request, email_address):
     #     logger.debug(f"Confirming email for: {email_address.email}")

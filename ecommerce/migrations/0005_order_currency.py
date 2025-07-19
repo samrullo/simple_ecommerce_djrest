@@ -5,15 +5,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ecommerce', '0004_remove_product_image_productimage'),
+        ("ecommerce", "0004_remove_product_image_productimage"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='order',
-            name='currency',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='ecommerce.currency'),
+            model_name="order",
+            name="currency",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="ecommerce.currency",
+            ),
         ),
     ]

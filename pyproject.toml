@@ -17,4 +17,5 @@ dependencies = [
     "requests>=2.32.4",
     "sampytools>=1.0.0",
     "sqlalchemy>=2.0.41",
+    "tqdm>=4.67.1",
 ]
