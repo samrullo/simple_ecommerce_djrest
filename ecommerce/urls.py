@@ -6,6 +6,7 @@ from .viewsets.user.viewsets import (
     RoleViewSet,
     StaffViewSet,
 )
+from ecommerce.viewsets.user.admin_viewsets import CustomerAdminViewSet
 from .viewsets.order.viewsets import OrderViewSet, OrderItemViewSet, PaymentViewSet
 from .viewsets.inventory.viewsets import InventoryViewSet
 from .viewsets.purchase.viewsets import (
@@ -61,6 +62,7 @@ router.register(r"staff", StaffViewSet, basename="staff")
 router.register(r"accounts", AccountViewSet)
 router.register(r"journal-entries", JournalEntryViewSet)
 router.register(r"journal-entry-lines", JournalEntryLineViewSet)
+router.register(r"admin-customers", CustomerAdminViewSet, basename="admin-customer")
 
 urlpatterns = [
     path("v1/", include(router.urls)),
@@ -104,4 +106,5 @@ urlpatterns = [
         name="create_update_purchases_from_csv",
     ),
     path("v1/create-order/", OrderCreateAPIView.as_view(), name="create_order"),
+
 ]
