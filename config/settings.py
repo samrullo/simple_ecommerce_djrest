@@ -215,7 +215,7 @@ REST_FRAMEWORK = {
     ]
 }
 
-CORS_ORIGIN_WHITELIST = ["http://family-spending.local", "http://localhost:3000"]
+CORS_ORIGIN_WHITELIST = ["http://family-spending.local", "http://localhost:3000","https://simple-ecommerce-front.onrender.com/"]
 CORS_ALLOW_CREDENTIALS = True
 
 # Email Backend (Use Console for Testing)

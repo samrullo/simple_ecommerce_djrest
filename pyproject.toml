@@ -24,3 +24,6 @@ dependencies = [
     "tqdm>=4.67.1",
     "whitenoise>=6.9.0",
 ]
+
+[tool.setuptools]
+packages = ["ecommerce", "api", "config"]
