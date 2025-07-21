@@ -1,25 +1,36 @@
-# Use an official Python runtime as a parent image
 FROM python:3.12-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Copy uv binary
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# Set the working directory in the container
+# Set environment variables for uv and virtualenv
+ENV UV_PROJECT_ENVIRONMENT=/venv \
+    UV_NO_MANAGED_PYTHON=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    VIRTUAL_ENV=/venv
+
+# Create virtual environment
+RUN uv venv $VIRTUAL_ENV
+
+# Set workdir for dependency resolution
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends     build-essential     libpq-dev     && rm -rf /var/lib/apt/lists/*
+# Copy dependency files and wheels directory
+COPY pyproject.toml uv.lock ./  
+COPY py_wheels ./py_wheels
 
-# Install Python dependencies
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies using local wheels
+RUN --mount=type=cache,target=/app/.cache/uv \
+    uv sync --no-install-project --no-editable --find-links ./py_wheels
 
-# Copy the project code into the container
-COPY . /app/
+# Copy Django project source code
+COPY . .
 
-# Expose the port the app runs on
+# Collect static files
+RUN python manage.py collectstatic --noinput
+
+# Tell Render which port to expose
 EXPOSE 8000
 
-# Run the application
-CMD ["gunicorn", "--bind", ":8000", "--workers", "3", "config.wsgi:application"]
+# Start Gunicorn server
+CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"]
