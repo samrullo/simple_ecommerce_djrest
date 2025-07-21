@@ -35,6 +35,9 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEBUG = True
 
 ALLOWED_HOSTS = ["simple-ecommerce-djrest.onrender.com"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://simple-ecommerce-djrest.onrender.com",
+]
 
 # At the bottom of your settings.py file (after INSTALLED_APPS, etc.)
 # DJ_REST_AUTH = {
