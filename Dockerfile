@@ -26,9 +26,6 @@ RUN --mount=type=cache,target=/app/.cache/uv \
 # Copy Django project source code
 COPY . .
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
-
 # Tell Render which port to expose
 EXPOSE 8000
 
