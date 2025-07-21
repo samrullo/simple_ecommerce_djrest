@@ -1,32 +1,51 @@
-version: '3.8'
+version: "3.7"
 
 services:
-  web:
-    build: .
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
+  simple-ecommerce:
+    container_name: simple_ecommerce
+    build:
+      context: .
+      dockerfile: DockerfileLocal.dockerfile
     volumes:
       - .:/app
     ports:
       - "8000:8000"
+    environment:
+      DEBUG: "1"
+      hostname: "localhost"
+      webappport: "8000"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: simple_ecommerce
+      POSTGRES_HOST: ecommerce_postgres
+      POSTGRES_PORT: 5432
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
     depends_on:
-      - db
-    environment:
-      - SECRET_KEY=your_secret_key
-      - DEBUG=1
-      - DB_NAME=postgres
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_HOST=db
-      - DB_PORT=5432
+      postgres:
+        condition: service_healthy
+    networks:
+      - ecommerce-network
 
-  db:
-    image: postgres:13
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
+  postgres:
+    image: postgres
+    container_name: ecommerce_postgres
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: simple_ecommerce
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres && psql -U postgres -d simple_ecommerce -c 'SELECT 1;'"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecommerce-network
 
 volumes:
-  postgres_data:
+  pgdata:
+
+networks:
+  ecommerce-network:
+    driver: bridge
