@@ -8,6 +8,14 @@ from allauth.account.models import EmailConfirmation
 
 logger = logging.getLogger(__name__)
 
+User = get_user_model()
+
+
+class UserSummarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "email"]
+
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,6 +30,15 @@ class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = ["id", "phone", "addresses"]  # Add any additional fields from Customer
+
+
+class CustomerWithUserSerializer(serializers.ModelSerializer):
+    user = UserSummarySerializer()
+    addresses = AddressSerializer(many=True)
+
+    class Meta:
+        model = Customer
+        fields = ["id", "phone", "user", "addresses"]
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -117,7 +134,7 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         return user
 
     def send_confirmation_mail(
-        self, request, emailconfirmation: EmailConfirmation, signup
+            self, request, emailconfirmation: EmailConfirmation, signup
     ):
         """
         Override the confirmation link sent in the email.

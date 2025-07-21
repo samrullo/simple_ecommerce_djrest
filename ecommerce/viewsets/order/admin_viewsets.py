@@ -1,81 +1,52 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, permissions
 from django.db import transaction
 from decimal import Decimal
 from django.shortcuts import get_object_or_404
 from ecommerce.models.product.models import Currency, FXRate
-from ecommerce.serializers import (
-    OrderSerializer,
-    OrderItemSerializer,
-    OrderWithItemsSerializer,
-    PaymentSerializer,
-)
 from ecommerce.models.order.models import Order, OrderItem, Payment
 from ecommerce.models.product.models import Product, ProductPrice
 from ecommerce.models.users.models import Customer
-from ecommerce.models.accounting.models import Account
-from ecommerce.viewsets.accounting.viewsets import (
-    journal_entry_when_product_is_sold_fifo,
-)
-from ecommerce.models.accounting.models import JournalEntry, JournalEntryLine
+from ecommerce.models.accounting.models import Account, JournalEntry, JournalEntryLine
+from ecommerce.viewsets.accounting.viewsets import journal_entry_when_product_is_sold_fifo
 from ecommerce.viewsets.order.utils import convert_price
+from ecommerce.models.order.models import Order
+from ecommerce.serializers import OrderWithItemsSerializer
 
 
-class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.all()
-    serializer_class = OrderSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.is_staff or user.is_superuser:
-            return Order.objects.all()
-        return Order.objects.filter(customer__user=user)
+class AdminOrderViewSet(viewsets.ModelViewSet):
+    """
+    Allows admin to view, list, and retrieve orders across all customers.
+    """
+    queryset = Order.objects.select_related(
+        "customer__user", "currency"
+    ).prefetch_related("items__product", "customer__addresses", "payment")
+    serializer_class = OrderWithItemsSerializer
+    permission_classes = [permissions.IsAdminUser]
 
     @action(detail=True, methods=["get"], url_path="with-items")
     def retrieve_with_items(self, request, pk=None):
-        user = request.user
+        """
+        Retrieve full order with items for a given order ID.
+        """
         order = get_object_or_404(Order, pk=pk)
-
-        if not user.is_staff and not user.is_superuser and order.customer.user != user:
-            return Response(
-                {"detail": "Not authorized."}, status=status.HTTP_403_FORBIDDEN
-            )
-
         serializer = OrderWithItemsSerializer(order)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-class OrderItemViewSet(viewsets.ModelViewSet):
-    queryset = OrderItem.objects.all()
-    serializer_class = OrderItemSerializer
+class AdminOrderCreateAPIView(APIView):
     permission_classes = [permissions.IsAdminUser]
 
-
-class PaymentViewSet(viewsets.ModelViewSet):
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSerializer
-    permission_classes = [permissions.IsAdminUser]
-
-
-class OrderCreateAPIView(APIView):
     def post(self, request):
         try:
+            customer_id = request.data.get("customer_id")
             order_items_data = request.data.get("items", [])
             payment_method = request.data.get("payment_method", "cash_on_delivery")
-            user = request.user
 
-            if not user.is_authenticated:
-                return Response(
-                    {"error": "Authentication required."},
-                    status=status.HTTP_401_UNAUTHORIZED,
-                )
-
-            customer = get_object_or_404(Customer, user=user)
-            base_currency_code = request.data.get("base_currency")  # e.g., "JPY"
+            customer = get_object_or_404(Customer, id=customer_id)
+            base_currency_code = request.data.get("base_currency")
             base_currency = get_object_or_404(Currency, code=base_currency_code)
             fx_rates = {
                 (fx.currency_from.code, fx.currency_to.code): fx.rate
@@ -104,9 +75,7 @@ class OrderCreateAPIView(APIView):
                     ).first()
 
                     if not active_price:
-                        raise ValueError(
-                            f"No active price found for product {product.name}"
-                        )
+                        raise ValueError(f"No active price for product {product.name}")
 
                     converted_price = convert_price(
                         active_price.price,
@@ -128,13 +97,10 @@ class OrderCreateAPIView(APIView):
                     cost = journal_entry_when_product_is_sold_fifo(
                         product=product, quantity_sold=quantity
                     )
-                    # Optionally accumulate cost if needed
 
-                # Save total amount on order
                 order.total_amount = total_amount
                 order.save()
 
-                # Create payment record
                 Payment.objects.create(
                     order=order,
                     method=payment_method,
@@ -142,12 +108,11 @@ class OrderCreateAPIView(APIView):
                     transaction_id=None,
                 )
 
-                # Add income journal entry
-                income_account = Account.objects.get(code="4000")  # Sales income
-                cash_account = Account.objects.get(code="1000")  # Cash or receivable
+                income_account = Account.objects.get(code="4000")
+                cash_account = Account.objects.get(code="1000")
 
                 journal_entry = JournalEntry.objects.create(
-                    description=f"Income from order {order.id}"
+                    description=f"Income from admin-submitted order {order.id}"
                 )
 
                 JournalEntryLine.objects.create(
@@ -155,23 +120,22 @@ class OrderCreateAPIView(APIView):
                     account=cash_account,
                     debit=total_amount,
                     credit=Decimal("0.00"),
-                    description="Cash or receivable from sale",
+                    description="Cash or receivable from admin order",
                 )
                 JournalEntryLine.objects.create(
                     journal_entry=journal_entry,
                     account=income_account,
                     debit=Decimal("0.00"),
                     credit=total_amount,
-                    description="Sales income",
+                    description="Sales income from admin order",
                 )
 
-                # Save journal lines from inventory changes
                 for line in journal_lines:
                     line.journal_entry = journal_entry
                     line.save()
 
                 return Response(
-                    {"message": "Order created successfully.", "order_id": order.id},
+                    {"message": "Order created by admin.", "order_id": order.id},
                     status=status.HTTP_201_CREATED,
                 )
 

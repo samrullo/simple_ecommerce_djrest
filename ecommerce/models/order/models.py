@@ -56,7 +56,7 @@ class Payment(models.Model):
         ("cash_on_delivery", "Cash on Delivery"),
     ]
 
-    order = models.OneToOneField(Order, on_delete=models.CASCADE)
+    order = models.OneToOneField(Order,related_name="payment", on_delete=models.CASCADE)
     method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
     status = models.CharField(max_length=20, default="pending")
     transaction_id = models.CharField(max_length=255, blank=True, null=True)

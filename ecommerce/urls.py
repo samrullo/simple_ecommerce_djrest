@@ -38,6 +38,7 @@ from .viewsets.product.viewsets import (
     ProductCreateUpdateFromCSVAPIView,
 )
 from ecommerce.viewsets.order.viewsets import OrderCreateAPIView
+from ecommerce.viewsets.order.admin_viewsets import AdminOrderViewSet, AdminOrderCreateAPIView
 from ecommerce.viewsets.product.viewsets import CurrencyViewSet, FXRateViewSet
 
 router = DefaultRouter()
@@ -63,6 +64,7 @@ router.register(r"accounts", AccountViewSet)
 router.register(r"journal-entries", JournalEntryViewSet)
 router.register(r"journal-entry-lines", JournalEntryLineViewSet)
 router.register(r"admin-customers", CustomerAdminViewSet, basename="admin-customer")
+router.register(r'admin-orders', AdminOrderViewSet, basename='admin-orders')
 
 urlpatterns = [
     path("v1/", include(router.urls)),
@@ -106,5 +108,6 @@ urlpatterns = [
         name="create_update_purchases_from_csv",
     ),
     path("v1/create-order/", OrderCreateAPIView.as_view(), name="create_order"),
+    path("v1/admin-create-order/", AdminOrderCreateAPIView.as_view(), name="admin-create-order")
 
 ]

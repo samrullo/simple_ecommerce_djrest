@@ -3,7 +3,7 @@ from ecommerce.models import OrderItem, Order, Payment
 from ecommerce.serializers.product.serializers import (
     CurrencySerializer,
 )
-from ecommerce.serializers.user.serializers import CustomerSerializer
+from ecommerce.serializers.user.serializers import CustomerSerializer,CustomerWithUserSerializer
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -36,7 +36,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 class OrderWithItemsSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
-    customer = CustomerSerializer(read_only=True)
+    customer = CustomerWithUserSerializer(read_only=True)
     currency = CurrencySerializer(read_only=True)
 
     class Meta:
