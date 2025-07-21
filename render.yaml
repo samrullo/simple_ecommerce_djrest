@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: simple-ecommerce
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    buildCommand: ""  # Already handled by Dockerfile
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:8000
+    preDeployCommand: |
+      python manage.py migrate
+      python manage.py collectstatic --noinput
