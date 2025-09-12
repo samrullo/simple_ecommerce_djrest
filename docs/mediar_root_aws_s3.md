@@ -243,3 +243,46 @@ ecommerce/media/products/123/shoe.jpg
 	•	You can also create multiple storage backends (e.g., PublicMediaStorage, PrivateMediaStorage) if you want to restrict access.
 
 Let me know if you want a helper to generate unique paths for images or restrict access to uploads!
+
+# Use STORAGES dictionary after Django 4.2
+It turned out I had to use ```STORAGES``` dictionary to define s3 bucket and location to upload ImageFields and static files
+I still had to define AWS_* variables like access keys.
+But didn't have to specify ```DEFAULT_STORAGE```
+
+```python
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME","elasticbeanstalk-us-west-2-384482548730")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME","ap-northeast-1")  # or your actual region
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+AWS_QUERYSTRING_AUTH = False
+
+
+# define the STORAGES dictionary. After Django 4.2+ this is the way to specify s3 backends
+STORAGES = {
+    # 'default' is the key used for models.FileField and models.ImageField
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            # AWS credentials and bucket name are still needed globally
+            "bucket_name": "elasticbeanstalk-us-west-2-384482548730",
+            # Other options can be specified here to override global settings
+            "location": "ecommerce/media", # Optional: Adds a path prefix within the bucket
+            "default_acl": "public-read", # Optional: Sets default permissions
+        },
+    },
+    # 'staticfiles' is the key used by Django's collectstatic command
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3boto3.S3StaticStorage",
+        "OPTIONS": {
+            # Specific options for static files
+            "bucket_name": "elasticbeanstalk-us-west-2-384482548730",
+            "location": "ecommerce/static", # A path prefix for static files
+            "default_acl":"public-read"
+        },
+    },
+}
+```
+
+Setting ```AWS_QUERYSTRIN_AUTH=False``` was necessary to give public access to product images
