@@ -6,6 +6,7 @@ from .models import (
     Tag,
     Product,
     ProductPrice,
+    ProductImage,
     Inventory,
     Order,
     OrderItem,
@@ -59,6 +60,10 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(ProductPrice)
 class ProductPriceAdmin(admin.ModelAdmin):
     list_display = ["product", "price", "discount_price", "currency"]
+    search_fields = ["product__name"]
+
+@admin.register(ProductImage)
+class ProductImageAdmin(admin.ModelAdmin):
     search_fields = ["product__name"]
 
 

@@ -8,6 +8,11 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
 from ecommerce.models.inventory.models import Inventory
+from ecommerce.models.product.models import Product,ProductImage
 
 inventories = Inventory.objects.all()
 print(f"inventories : {len(inventories)}")
+
+product=Product.objects.get(pk=2)
+pimage=ProductImage.objects.filter(product=product).first()
+print(f"product image name : {pimage.image}")

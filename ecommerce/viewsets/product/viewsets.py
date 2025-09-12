@@ -153,21 +153,18 @@ def add_or_update_product(
     product_sku: str = None,
     product_image=None,
 ) -> Product:
-    (
-        """
-    
-    :param category_name: 
-    :param brand_name: 
-    :param tag_names: 
-    :param pk: 
-    :param product_name: 
-    :param product_description: 
-    :param product_sku: 
-    :param product_image: 
-    :return: 
     """
-        ""
-    )
+    Add or update product
+    :param category_name:
+    :param brand_name:
+    :param tag_names:
+    :param pk:
+    :param product_name:
+    :param product_description:
+    :param product_sku:
+    :param product_image:
+    :return:
+    """
     # category
     category, _ = Category.objects.get_or_create(name=category_name)
 
@@ -196,6 +193,8 @@ def add_or_update_product(
             else:
                 product_image_obj.image = product_image
                 product_image_obj.save()
+                logger.debug(f"Uploaded to: {product_image_obj.image.name}" )
+                logger.debug(f"Accessible at: {product_image_obj.image.url}")
         if category:
             product.category = category
         if brand:

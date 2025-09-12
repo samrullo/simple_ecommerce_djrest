@@ -28,8 +28,40 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-3=ym!*_0lzt(x*dh4-j2b%j5#x1by&)p575(gz8%@47gkziuq*"
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME","elasticbeanstalk-us-west-2-384482548730")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME","ap-northeast-1")  # or your actual region
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+AWS_QUERYSTRING_AUTH = False
+
+
+# define the STORAGES dictionary. After Django 4.2+ this is the way to specify s3 backends
+STORAGES = {
+    # 'default' is the key used for models.FileField and models.ImageField
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            # AWS credentials and bucket name are still needed globally
+            "bucket_name": "elasticbeanstalk-us-west-2-384482548730",
+            # Other options can be specified here to override global settings
+            "location": "ecommerce/media", # Optional: Adds a path prefix within the bucket
+            "default_acl": "public-read", # Optional: Sets default permissions
+        },
+    },
+    # 'staticfiles' is the key used by Django's collectstatic command
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3boto3.S3StaticStorage",
+        "OPTIONS": {
+            # Specific options for static files
+            "bucket_name": "elasticbeanstalk-us-west-2-384482548730",
+            "location": "ecommerce/static", # A path prefix for static files
+            "default_acl":"public-read"
+        },
+    },
+}
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -102,6 +134,7 @@ INSTALLED_APPS = [
     "ecommerce",
     "api",
     "corsheaders",
+    "storages"
 ]
 
 MIDDLEWARE = [
@@ -229,9 +262,9 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"  # Check your SES region
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "AKIAVTBHSDP5HFAJMOKV"  # From AWS SES SMTP credentials
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")  # From AWS SES SMTP credentials
 EMAIL_HOST_PASSWORD = (
-    "BHe8b5oB16He1X6Yv5N+KKAnvmdbwkXOLmqgXnfQeELi"  # From AWS SES SMTP credentials
+    os.getenv("EMAIL_HOST_PASSWORD")  # From AWS SES SMTP credentials
 )
 DEFAULT_FROM_EMAIL = "amrulloev.subhon@gmail.com"  # Must be a verified email in SES
 
