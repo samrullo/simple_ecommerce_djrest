@@ -1,6 +1,7 @@
 import logging
 import pathlib
 import pandas as pd
+from sampytools.list_utils import get_chunked_list
 from sampytools.logging_utils import init_logging
 from sampytools.pandas_utils import create_new_col_based_on_dict
 
@@ -66,6 +67,9 @@ uploaddf["product_name"]=uploaddf["product_name"].map(lambda product_name:produc
 # add SKU, stock keeping unit
 uploaddf["sku"]=[f"{product_name[:46].upper()}{idx:04}"for idx,product_name in zip(uploaddf.index,uploaddf["product_name"])]
 
-upload_filename = "rakuten_products_for_upload2.csv"
-uploaddf.to_csv(data_folder / upload_filename, index=False)
-logging.info(f"Saved rakuten for upload file to {data_folder / upload_filename}")
+index_chunks=get_chunked_list(uploaddf.index,200)
+
+for i,index_chunk in enumerate(index_chunks):
+    upload_filename = f"rakuten_products_for_upload{i:02}.csv"
+    uploaddf.loc[index_chunk].to_csv(data_folder / upload_filename, index=False)
+    logging.info(f"Saved rakuten for upload file to {data_folder / upload_filename}")
