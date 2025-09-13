@@ -227,9 +227,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# STATIC_URL = "static/"
+# STATIC_ROOT = BASE_DIR / "staticfiles"
+# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+AWS_S3_CUSTOM_DOMAIN = f'{STORAGES["staticfiles"]["OPTIONS"]["bucket_name"]}.s3.amazonaws.com'
+
+STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{STORAGES['staticfiles']['OPTIONS']['location']}/"
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{STORAGES['default']['OPTIONS']['location']}/"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
