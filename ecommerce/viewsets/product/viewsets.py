@@ -300,7 +300,7 @@ class ProductCreationAPIView(APIView):
                     status=status.HTTP_201_CREATED,
                 )
         except Exception as e:
-            logger.debug("Traceback:", traceback.format_exc())
+            logger.debug(f"Traceback: {traceback.format_exc()}")
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -356,7 +356,7 @@ class ProductUpdateAPIView(APIView):
                     status=status.HTTP_200_OK,
                 )
         except Exception as e:
-            logger.debug("Traceback:", traceback.format_exc())
+            logger.debug(f"Traceback: {traceback.format_exc()}")
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -440,7 +440,7 @@ class ProductCreateUpdateFromCSVAPIView(APIView):
                 status=status.HTTP_200_OK,
             )
         except Exception as e:
-            logger.debug("Traceback:", traceback.format_exc())
+            logger.debug(f"Traceback:{traceback.format_exc()}")
             return Response(
                 {"error": f"Product create or update from csv failed : {e}"},
                 status=status.HTTP_400_BAD_REQUEST,

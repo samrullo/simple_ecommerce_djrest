@@ -59,6 +59,13 @@ product_name_to_category = {
 uploaddf = create_new_col_based_on_dict(
     uploaddf, "product_name", "category_name", product_name_to_category
 )
-upload_filename = "rakuten_products_for_upload.csv"
+
+# make sure product names are 255 characters
+uploaddf["product_name"]=uploaddf["product_name"].map(lambda product_name:product_name[:255])
+
+# add SKU, stock keeping unit
+uploaddf["sku"]=[f"{product_name[:46].upper()}{idx:04}"for idx,product_name in zip(uploaddf.index,uploaddf["product_name"])]
+
+upload_filename = "rakuten_products_for_upload2.csv"
 uploaddf.to_csv(data_folder / upload_filename, index=False)
 logging.info(f"Saved rakuten for upload file to {data_folder / upload_filename}")
