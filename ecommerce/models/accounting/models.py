@@ -47,7 +47,7 @@ class JournalEntryLine(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     debit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     credit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    description = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
 
     def __str__(self):
         return f"{self.account.name}: Debit {self.debit} / Credit {self.credit}"
