@@ -101,7 +101,13 @@ REST_AUTH_SERIALIZERS = {
 }
 
 # Optional: so emails show http://localhost:3000 instead of backend's domain
-SITE_DOMAIN = "localhost:3000"
+HOSTING_TYPE = os.getenv("HOSTING_TYPE", "LOCAL")
+FRONT_SITE_DOMAIN = os.getenv("FRONT_SITE_DOMAIN", "localhost:3000")
+
+if HOSTING_TYPE == "LOCAL":
+    SITE_DOMAIN = "localhost:3000"
+else:
+    SITE_DOMAIN = FRONT_SITE_DOMAIN
 SITE_NAME = "Simple Ecommerce Front"
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
