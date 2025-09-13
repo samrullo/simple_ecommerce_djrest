@@ -27,11 +27,11 @@ class Account(models.Model):
 
 class JournalEntry(models.Model):
     date = models.DateField(auto_now_add=True)
-    description = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
     reference = models.CharField(max_length=100, blank=True)  # e.g., order number
 
     def __str__(self):
-        return f"Journal Entry {self.id} on {self.date}"
+        return f"Journal Entry {self.pk} on {self.date}"
 
     @property
     def is_balanced(self):

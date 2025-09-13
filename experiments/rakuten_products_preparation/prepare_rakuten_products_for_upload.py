@@ -4,6 +4,8 @@ import pandas as pd
 from sampytools.logging_utils import init_logging
 from sampytools.pandas_utils import create_new_col_based_on_dict
 
+from experiments.rakuten_products_preparation.category_mapping import category_mapping_filename
+
 init_logging(level=logging.INFO)
 
 data_folder = pathlib.Path(
@@ -20,24 +22,24 @@ logging.info(f"There are {len(productdf)} records")
 transdf = pd.read_csv(data_folder / product_translations_filename)
 logging.info(f"There are {len(transdf)} records in translations file")
 
-# prodcatdf = pd.read_csv(data_folder / product_categories_filename)
+prodcatdf = pd.read_csv(data_folder / product_categories_filename)
 from sampytools.text_utils import get_delimited_records_from_file
 
-category_records = get_delimited_records_from_file(
-    data_folder / product_categories_filename, ","
-)
-for idx, record in enumerate(category_records):
-    if len(record) > 2:
-        product_category = record[-1]
-        product_name = ",".join(record[:-2])
-        logging.info(f"product_name : {product_name}, category : {product_category}")
-        category_records[idx] = [product_name, product_category]
-prodcatdf = pd.DataFrame(
-    {
-        "product_name": [record[0] for record in category_records],
-        "category": [record[1] for record in category_records],
-    }
-)
+# category_records = get_delimited_records_from_file(
+#     data_folder / product_categories_filename, ","
+# )
+# for idx, record in enumerate(category_records):
+#     if len(record) > 2:
+#         product_category = record[-1]
+#         product_name = ",".join(record[:-2])
+#         logging.info(f"product_name : {product_name}, category : {product_category}")
+#         category_records[idx] = [product_name, product_category]
+# prodcatdf = pd.DataFrame(
+#     {
+#         "product_name": [record[0] for record in category_records],
+#         "category": [record[1] for record in category_records],
+#     }
+# )
 
 logging.info(f"There are {len(prodcatdf)} records in product categories filename")
 
@@ -56,12 +58,10 @@ product_name_to_category = {
     name: category
     for name, category in zip(prodcatdf["product_name"], prodcatdf["category"])
 }
-uploaddf = create_new_col_based_on_dict(
-    uploaddf, "product_name", "category_name", product_name_to_category
-)
+uploaddf["category_name"]=uploaddf["product_name"].map(lambda product_name:product_name_to_category.get(product_name,"Other"))
 
 # make sure product names are 255 characters
-uploaddf["product_name"]=uploaddf["product_name"].map(lambda product_name:product_name[:255])
+uploaddf["product_name"]=uploaddf["product_name"].map(lambda product_name:product_name[:254])
 
 # add SKU, stock keeping unit
 uploaddf["sku"]=[f"{product_name[:46].upper()}{idx:04}"for idx,product_name in zip(uploaddf.index,uploaddf["product_name"])]
