@@ -30,12 +30,11 @@ SECRET_KEY = "django-insecure-3=ym!*_0lzt(x*dh4-j2b%j5#x1by&)p575(gz8%@47gkziuq*
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME","elasticbeanstalk-us-west-2-384482548730")
-AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME","ap-northeast-1")  # or your actual region
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "elasticbeanstalk-us-west-2-384482548730")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "ap-northeast-1")  # or your actual region
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None
 AWS_QUERYSTRING_AUTH = False
-
 
 # define the STORAGES dictionary. After Django 4.2+ this is the way to specify s3 backends
 STORAGES = {
@@ -46,8 +45,8 @@ STORAGES = {
             # AWS credentials and bucket name are still needed globally
             "bucket_name": "elasticbeanstalk-us-west-2-384482548730",
             # Other options can be specified here to override global settings
-            "location": "ecommerce/media", # Optional: Adds a path prefix within the bucket
-            "default_acl": "public-read", # Optional: Sets default permissions
+            "location": "ecommerce/media",  # Optional: Adds a path prefix within the bucket
+            "default_acl": "public-read",  # Optional: Sets default permissions
         },
     },
     # 'staticfiles' is the key used by Django's collectstatic command
@@ -56,20 +55,22 @@ STORAGES = {
         "OPTIONS": {
             # Specific options for static files
             "bucket_name": "elasticbeanstalk-us-west-2-384482548730",
-            "location": "ecommerce/static", # A path prefix for static files
-            "default_acl":"public-read"
+            "location": "ecommerce/static",  # A path prefix for static files
+            "default_acl": "public-read"
         },
     },
 }
 
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost","simple-ecommerce-djrest.onrender.com"]
-CSRF_TRUSTED_ORIGINS = [
-    "https://simple-ecommerce-djrest.onrender.com",
-]
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,simple-ecommerce-djrest").split(",") + ["localhost",
+                                                                                              "simple-ecommerce-djrest.onrender.com",
+                                                                                              "simple-ecommerce-front.onrender.com"]
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS",
+                                 "https://simple-ecommerce-djrest.onrender.com,http://localhost:3000").split(",") + [
+                           "https://simple-ecommerce-djrest.onrender.com",
+                       ]
 
 # At the bottom of your settings.py file (after INSTALLED_APPS, etc.)
 # DJ_REST_AUTH = {
@@ -187,7 +188,7 @@ local_dbconfig = {
     "NAME": BASE_DIR / "db.sqlite3",
 }
 
-db_host_type = os.environ.get("DB_HOST_TYPE","LOCAL")
+db_host_type = os.environ.get("DB_HOST_TYPE", "LOCAL")
 
 default_dbconfig = local_dbconfig if db_host_type == "LOCAL" else postgres_dbconfig
 
@@ -235,7 +236,6 @@ AWS_S3_CUSTOM_DOMAIN = f'{STORAGES["staticfiles"]["OPTIONS"]["bucket_name"]}.s3.
 
 STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{STORAGES['staticfiles']['OPTIONS']['location']}/"
 MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{STORAGES['default']['OPTIONS']['location']}/"
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
