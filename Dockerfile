@@ -24,8 +24,5 @@ RUN --mount=type=cache,target=/app/.cache/uv \
 # Copy app code
 COPY . .
 
-# Collect static files (must happen after copying code)
-RUN python manage.py collectstatic --noinput
-
 # Default command (can be overridden by docker-compose)
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
