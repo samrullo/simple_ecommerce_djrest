@@ -91,7 +91,7 @@ from ecommerce.serializers.product.serializers import ProductWithImageSerializer
 
 
 class ProductWithImageListView(ListAPIView):
-    queryset = Product.objects.all()
+    queryset = Product.objects.all().select_related("category","brand").prefetch_related("images","price","inventory","tags")
     serializer_class = ProductWithImageSerializer
 
 
