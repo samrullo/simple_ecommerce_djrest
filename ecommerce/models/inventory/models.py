@@ -20,3 +20,13 @@ class Inventory(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.stock} pcs from {self.purchase.purchase_datetime.strftime('%Y-%m-%d')}"
+
+class ProductInventory(models.Model):
+    """
+    Stores total inventory of each product. This will be used to efficiently fetch product inventories
+    """
+    product=models.ForeignKey(Product,related_name="total_inventory",on_delete=models.CASCADE)
+    total_inventory=models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.product.name} total inventory : {self.total_inventory}"

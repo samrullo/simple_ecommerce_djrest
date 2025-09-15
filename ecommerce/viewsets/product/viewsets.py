@@ -38,7 +38,7 @@ from ecommerce.serializers import (
     ProductImageSerializer,
     ProductPriceSerializer,
     ProductReviewSerializer,
-    WishlistSerializer,
+    WishlistSerializer, ProductWithIconImageSerializer,
 )
 from ecommerce.viewsets.accounting.viewsets import (
     journal_entries_for_direct_inventory_changes,
@@ -89,11 +89,26 @@ from rest_framework.generics import ListAPIView
 from ecommerce.models.product.models import Product
 from ecommerce.serializers.product.serializers import ProductWithImageSerializer
 
+class ActiveProductPriceListView(ListAPIView):
+    """
+    Returns only active product prices (end_date is NULL).
+    """
+    serializer_class = ProductPriceSerializer
+
+    def get_queryset(self):
+        queryset = ProductPrice.objects.filter(end_date__isnull=True)
+        product_id = self.request.query_params.get("product_id")
+        if product_id:
+            queryset = queryset.filter(product_id=product_id)
+        return queryset.select_related("currency")
 
 class ProductWithImageListView(ListAPIView):
     queryset = Product.objects.all().select_related("category","brand").prefetch_related("images","price","inventory","tags")
     serializer_class = ProductWithImageSerializer
 
+class ProductWithIconImageListView(ListAPIView):
+    queryset = Product.objects.all().select_related("category","brand").prefetch_related("images","price")
+    serializer_class = ProductWithIconImageSerializer
 
 class ProductImageViewset(viewsets.ModelViewSet):
     queryset = ProductImage.objects.all()

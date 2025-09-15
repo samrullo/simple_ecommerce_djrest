@@ -12,7 +12,7 @@ from ecommerce.models import (
 )
 from ecommerce.models.product.models import Currency, FXRate
 from ecommerce.serializers.user.serializers import CustomerSerializer
-from ecommerce.serializers.inventory.serializers import InventorySerializer
+from ecommerce.serializers.inventory.serializers import InventorySerializer,ProductInventorySerializer
 
 
 class CurrencySerializer(serializers.ModelSerializer):
@@ -109,6 +109,20 @@ class ProductWithImageSerializer(serializers.ModelSerializer):
     def get_icon_images(self, obj):
         images = obj.images.filter(tag="icon")
         return ProductImageSerializer(images, many=True).data
+
+class ProductWithIconImageSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    brand = BrandSerializer(read_only=True)
+    tags = TagSerializer(many=True, read_only=True)
+    icon_image = serializers.SerializerMethodField()
+
+    class Meta:
+        model=Product
+        fields="__all__"
+
+    def get_icon_image(self,obj):
+        icon_image=obj.images.filter(tag="icon").first()
+        return ProductImageSerializer(icon_image).data
 
 
 class ProductReviewSerializer(serializers.ModelSerializer):
