@@ -11,9 +11,11 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.db.models.functions import TruncDate
 from django.db.models import Count
+from django.db.models import OuterRef, Subquery
+
 import pandas as pd
 import traceback
-from ecommerce.serializers.purchase.serializers import PurchaseSerializer
+from ecommerce.serializers.purchase.serializers import PurchaseSerializer, LastPurchasePriceSerializer
 from ecommerce.models import (
     Product,
     Purchase,
@@ -31,6 +33,19 @@ class PurchaseViewSet(viewsets.ModelViewSet):
     serializer_class = PurchaseSerializer
     permission_classes = [IsStaff]
 
+
+class LastPurchasePriceViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = LastPurchasePriceSerializer
+
+    def get_queryset(self):
+        latest_purchase = Purchase.objects.filter(
+            product=OuterRef("pk")
+        ).order_by("-purchase_datetime")
+
+        return Product.objects.annotate(
+            last_price=Subquery(latest_purchase.values("price_per_unit")[:1]),
+            last_currency_id=Subquery(latest_purchase.values("currency")[:1]),
+        )
 
 class PurchaseCreateAPIView(APIView):
     permission_classes = [IsStaff]

@@ -92,6 +92,10 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = "__all__"
 
+class ProductMinimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ["id", "name"]
 
 class ProductWithImageSerializer(serializers.ModelSerializer):
     # Display nested details for category, brand, and tags (read-only).

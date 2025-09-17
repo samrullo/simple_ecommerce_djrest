@@ -11,6 +11,7 @@ from .viewsets.order.viewsets import OrderViewSet, OrderItemViewSet, PaymentView
 from .viewsets.inventory.viewsets import InventoryViewSet,ProductInventoryViewset
 from .viewsets.purchase.viewsets import (
     PurchaseViewSet,
+LastPurchasePriceViewSet,
     PurchaseCreateAPIView,
     PurchaseUpdateAPIView,
     PurchaseCreateUpdateFromCSVAPIView,
@@ -25,7 +26,10 @@ from .viewsets.product.viewsets import (
     ProductWithImageListView,
     ProductPriceViewSet,
     ProductReviewViewSet,
-    WishlistViewSet, ProductWithIconImageListView, ActiveProductPriceListView,
+    WishlistViewSet,
+    ProductWithIconImageListView,
+    ActiveProductPriceListView,
+    ProductMinimalListView
 )
 from .viewsets.accounting.viewsets import (
     AccountViewSet,
@@ -52,6 +56,7 @@ router.register(r"product-prices", ProductPriceViewSet, basename="product-price"
 router.register(r"inventories", InventoryViewSet, basename="inventory")
 router.register(r"product-total-inventories",ProductInventoryViewset,basename="product-total-inventory")
 router.register(r"purchases", PurchaseViewSet, basename="purchase")
+router.register(r"last-purchase-prices", LastPurchasePriceViewSet, basename="last-purchase-prices")
 router.register(r"orders", OrderViewSet, basename="order")
 router.register(r"order-items", OrderItemViewSet, basename="order-item")
 router.register(r"payments", PaymentViewSet, basename="payment")
@@ -76,6 +81,7 @@ urlpatterns = [
     ),
     path("v1/active-product-prices/",ActiveProductPriceListView.as_view(),name="active-product-prices"),
     path("v1/products-with-icon-image/",ProductWithIconImageListView.as_view(),name="products-with-icon-image"),
+    path("v1/minimal-products/",ProductMinimalListView.as_view(),name="minimal-products"),
     path("v1/create-product/", ProductCreationAPIView.as_view(), name="create-product"),
     path(
         "v1/update-product/<int:pk>/",
@@ -97,6 +103,7 @@ urlpatterns = [
         PurchaseDetailByDateAPIView.as_view(),
         name="purchases_by_date",
     ),
+
     path(
         "v1/create-purchase/", PurchaseCreateAPIView.as_view(), name="create-purchase"
     ),

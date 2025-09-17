@@ -14,6 +14,9 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from sampytools.list_utils import get_list_diff
 from ecommerce.permissions import IsStaff
 from ecommerce.permissions import IsStaffOrReadOnly
+from rest_framework.generics import ListAPIView
+from ecommerce.models.product.models import Product
+from ecommerce.serializers.product.serializers import ProductWithImageSerializer
 
 from ecommerce.models import (
     Category,
@@ -28,13 +31,14 @@ from ecommerce.models import (
 from ecommerce.models.product.models import Currency, FXRate
 from ecommerce.serializers.product.serializers import (
     CurrencySerializer,
-    FXRateSerializer,
+    FXRateSerializer
 )
 from ecommerce.serializers import (
     CategorySerializer,
     BrandSerializer,
     TagSerializer,
     ProductSerializer,
+    ProductMinimalSerializer,
     ProductImageSerializer,
     ProductPriceSerializer,
     ProductReviewSerializer,
@@ -83,11 +87,10 @@ class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = [IsStaffOrReadOnly]
 
 
-# views.py
+class ProductMinimalListView(ListAPIView):
+    queryset = Product.objects.filter(is_active=True).only("id", "name")
+    serializer_class = ProductMinimalSerializer
 
-from rest_framework.generics import ListAPIView
-from ecommerce.models.product.models import Product
-from ecommerce.serializers.product.serializers import ProductWithImageSerializer
 
 class ActiveProductPriceListView(ListAPIView):
     """
@@ -102,13 +105,17 @@ class ActiveProductPriceListView(ListAPIView):
             queryset = queryset.filter(product_id=product_id)
         return queryset.select_related("currency")
 
+
 class ProductWithImageListView(ListAPIView):
-    queryset = Product.objects.all().select_related("category","brand").prefetch_related("images","price","inventory","tags")
+    queryset = Product.objects.all().select_related("category", "brand").prefetch_related("images", "price",
+                                                                                          "inventory", "tags")
     serializer_class = ProductWithImageSerializer
 
+
 class ProductWithIconImageListView(ListAPIView):
-    queryset = Product.objects.all().select_related("category","brand").prefetch_related("images","price")
+    queryset = Product.objects.all().select_related("category", "brand").prefetch_related("images", "price")
     serializer_class = ProductWithIconImageSerializer
+
 
 class ProductImageViewset(viewsets.ModelViewSet):
     queryset = ProductImage.objects.all()
@@ -135,7 +142,7 @@ class WishlistViewSet(viewsets.ModelViewSet):
 
 
 def make_new_product(
-    name, description, category: Category, sku, brand: Brand = None, product_image=None
+        name, description, category: Category, sku, brand: Brand = None, product_image=None
 ) -> Product:
     """
     Make new product
@@ -159,14 +166,14 @@ def make_new_product(
 
 
 def add_or_update_product(
-    category_name: str,
-    brand_name: str = None,
-    tag_names: List[str] = None,
-    pk: int = None,
-    product_name: str = None,
-    product_description: str = None,
-    product_sku: str = None,
-    product_image=None,
+        category_name: str,
+        brand_name: str = None,
+        tag_names: List[str] = None,
+        pk: int = None,
+        product_name: str = None,
+        product_description: str = None,
+        product_sku: str = None,
+        product_image=None,
 ) -> Product:
     """
     Add or update product
@@ -208,7 +215,7 @@ def add_or_update_product(
             else:
                 product_image_obj.image = product_image
                 product_image_obj.save()
-                logger.debug(f"Uploaded to: {product_image_obj.image.name}" )
+                logger.debug(f"Uploaded to: {product_image_obj.image.name}")
                 logger.debug(f"Accessible at: {product_image_obj.image.url}")
         if category:
             product.category = category
@@ -236,7 +243,7 @@ def add_or_update_product(
 
 
 def add_or_update_product_price(
-    product: Product, price: str | int | float, currency_code: str
+        product: Product, price: str | int | float, currency_code: str
 ):
     """
     Create or update product price

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-
+from ecommerce.models.product.models import Product
 from ecommerce.models.purchase.models import Purchase
 from ecommerce.models.product.models import ProductImage
 from ecommerce.serializers.product.serializers import CurrencySerializer
@@ -33,4 +33,20 @@ class PurchaseSerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(image_url)
             return image_url
+        return None
+
+
+class LastPurchasePriceSerializer(serializers.ModelSerializer):
+    last_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    last_currency = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = ["id", "last_price", "last_currency"]
+
+    def get_last_currency(self, obj):
+        from ecommerce.models import Currency
+        if obj.last_currency_id:
+            currency = Currency.objects.get(id=obj.last_currency_id)
+            return {"code": currency.code, "name": currency.name}
         return None
