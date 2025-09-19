@@ -16,6 +16,8 @@ def update_product_inventory(sender, instance, **kwargs):
         defaults={"total_inventory": total}
     )
 
-@receiver([post_save,post_delete],sender=Product)
-def clear_all_cache_post_product_save(sender,**kwargs):
-    cache.clear()
+CACHE_KEY_PRODUCTS = "products_with_icon_image"
+
+@receiver([post_save, post_delete], sender=Product)
+def clear_products_cache(sender, **kwargs):
+    cache.delete(CACHE_KEY_PRODUCTS)
