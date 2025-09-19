@@ -3,6 +3,8 @@ import traceback
 import pandas as pd
 from django.utils import timezone
 from django.conf import settings
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework.views import APIView
 from typing import List
 from decimal import Decimal
@@ -112,8 +114,9 @@ class ProductWithImageListView(ListAPIView):
     serializer_class = ProductWithImageSerializer
 
 
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class ProductWithIconImageListView(ListAPIView):
-    queryset = Product.objects.all().select_related("category", "brand").prefetch_related("images", "price")
+    queryset = Product.objects.all().select_related("category", "brand").prefetch_related("images")
     serializer_class = ProductWithIconImageSerializer
 
 
