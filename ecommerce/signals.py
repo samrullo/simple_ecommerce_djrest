@@ -3,7 +3,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.db.models import Sum
 from django.core.cache import cache
-from ecommerce.models import Inventory, ProductInventory,Product
+from ecommerce.models import Inventory, ProductInventory,Product,ProductPrice
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,6 @@ CACHE_KEY_PRODUCTS = "products_with_icon_image"
 
 @receiver([post_save, post_delete], sender=Product)
 def clear_products_cache(sender, **kwargs):
-    logger.debug(f"Will delete cache key {CACHE_KEY_PRODUCTS}")
     cache.delete(CACHE_KEY_PRODUCTS)
     cache.clear()
-    logger.debug("All cache is cleared too")
+    logger.debug("All cache is cleared due to Product changes")

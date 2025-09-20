@@ -4,7 +4,7 @@ import pandas as pd
 from django.utils import timezone
 from django.conf import settings
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
+from django.views.decorators.cache import cache_page,cache_control
 from rest_framework.views import APIView
 from typing import List
 from decimal import Decimal
@@ -93,7 +93,6 @@ class ProductMinimalListView(ListAPIView):
     queryset = Product.objects.filter(is_active=True).only("id", "name")
     serializer_class = ProductMinimalSerializer
 
-
 class ActiveProductPriceListView(ListAPIView):
     """
     Returns only active product prices (end_date is NULL).
@@ -113,10 +112,7 @@ class ProductWithImageListView(ListAPIView):
                                                                                           "inventory", "tags")
     serializer_class = ProductWithImageSerializer
 
-# Define the key here or in your settings file
-CACHE_KEY_PRODUCTS = "products_with_icon_image"
-
-@method_decorator(cache_page(60 * 15,key_prefix=CACHE_KEY_PRODUCTS), name="dispatch")
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class ProductWithIconImageListView(ListAPIView):
     queryset = Product.objects.all().select_related("category", "brand").prefetch_related("images")
     serializer_class = ProductWithIconImageSerializer
