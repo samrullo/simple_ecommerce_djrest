@@ -1,0 +1,91 @@
+import logging
+import traceback
+import pandas as pd
+from django.db.models import Q
+from django.utils import timezone
+from django.conf import settings
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page, cache_control
+from rest_framework.views import APIView
+from typing import List
+from decimal import Decimal
+from django.db import transaction
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from rest_framework.parsers import JSONParser
+from ecommerce.permissions import IsStaff
+from ecommerce.models.product.models import FXRate, Currency
+
+logger = logging.getLogger(__name__)
+
+
+def add_or_update_fx_rates_against_non_primary_currency(fx_rate_against_primary: FXRate):
+    """
+    Update fx rates of other currencies against the currency updated
+    :param fx_rate_against_primary:
+    :return:
+    """
+    primary_currency = fx_rate_against_primary.currency_from
+    currency_to_update = fx_rate_against_primary.currency_to
+    currency_from_id = fx_rate_against_primary.currency_from.id
+    currency_to_id = fx_rate_against_primary.currency_to.id
+    other_currencies = Currency.objects.exclude(Q(id=currency_from_id) | Q(id=currency_to_id))
+    for other_currency in other_currencies:
+        other_ccy_to_primary_ccy_fx_rate = FXRate.objects.filter(currency_from=primary_currency,
+                                                                 currency_to=other_currency,
+                                                                 end_date__isnull=True).first()
+        active_fx_rate = FXRate.objects.filter(currency_from=currency_to_update,
+                                               currency_to=other_currency,
+                                               end_date__isnull=True).first()
+        if active_fx_rate:
+            active_fx_rate.end_date = timezone.now().date()
+            active_fx_rate.save()
+
+        # create new fx rate
+        ccy_to_other_ccy_fx_rate_val = other_ccy_to_primary_ccy_fx_rate.rate / fx_rate_against_primary.rate
+        new_fx_rate = FXRate.objects.create(currency_from=currency_to_update,
+                                            currency_to=other_currency,
+                                            rate=Decimal(ccy_to_other_ccy_fx_rate_val),
+                                            start_date=timezone.now().date())
+        logger.debug(f"Created new fx rate {new_fx_rate}")
+
+
+def create_or_udpate_fx_rate(fx_rate_data: dict):
+    # we expect currency_from_id, currency_to_id, rate, source to be present in fx_rate_data
+    currency_from = Currency.objects.get(id=fx_rate_data["currency_from_id"])
+    currency_to = Currency.objects.get(id=fx_rate_data["currency_to_id"])
+    active_fx_rate = FXRate.objects.filter(currency_from=currency_from, currency_to=currency_to,
+                                           end_date__isnull=True).first()
+    if active_fx_rate:
+        active_fx_rate.end_date = timezone.now().date()
+        active_fx_rate.save()
+    new_fx_rate = FXRate.objects.create(currency_from=currency_from,
+                                        currency_to=currency_to,
+                                        rate=Decimal(fx_rate_data["rate"]),
+                                        start_date=timezone.now().date(),
+                                        source=fx_rate_data.get("source", ""))
+    add_or_update_fx_rates_against_non_primary_currency(new_fx_rate)
+    return new_fx_rate
+
+
+class FXRateCreateUpdateAPIView(APIView):
+    parser_classes = [JSONParser]
+    permission_classes = [IsStaff]
+
+    def post(self, request):
+        try:
+            logger.debug(f"Incoming data for fx rate update : {request.data}")
+            new_fx_rate = create_or_udpate_fx_rate(request.data)
+            return Response({"message": f"Successfully created {new_fx_rate}"})
+        except Exception as e:
+            logger.debug(f"Error happened when updating fx rate : {e}")
+            return Response({"error": f"Error when updating fx rate {e}"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        try:
+            new_fx_rate = create_or_udpate_fx_rate(request.data)
+            return Response({"message": f"Successfully created {new_fx_rate}"})
+        except Exception as e:
+            logger.debug(f"Error happened when updating fx rate : {e}")
+            return Response({"error": f"Error when updating fx rate {e}"}, status=status.HTTP_400_BAD_REQUEST)

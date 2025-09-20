@@ -28,8 +28,16 @@ class FXRate(models.Model):
     is_active = models.BooleanField(default=True)
 
     class Meta:
-        unique_together = ("currency_from", "currency_to", "start_date")
         ordering = ["-start_date"]
+        constraints = [
+            # Only one active (end_date is NULL) per currency pair
+            models.UniqueConstraint(
+                fields=["currency_from", "currency_to"],
+                condition=models.Q(end_date__isnull=True),
+                name="only_one_active_fxrate_per_currency_pair",
+            ),
+
+        ]
 
     def __str__(self):
         return f"{self.currency_from.code}/{self.currency_to.code} @ {self.rate} ({self.start_date} - {self.end_date})"

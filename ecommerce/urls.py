@@ -9,10 +9,10 @@ from .viewsets.user.viewsets import (
 )
 from ecommerce.viewsets.user.admin_viewsets import CustomerAdminViewSet
 from .viewsets.order.viewsets import OrderViewSet, OrderItemViewSet, PaymentViewSet
-from .viewsets.inventory.viewsets import InventoryViewSet,ProductInventoryViewset
+from .viewsets.inventory.viewsets import InventoryViewSet, ProductInventoryViewset
 from .viewsets.purchase.viewsets import (
     PurchaseViewSet,
-LastPurchasePriceViewSet,
+    LastPurchasePriceViewSet,
     PurchaseCreateAPIView,
     PurchaseUpdateAPIView,
     PurchaseCreateUpdateFromCSVAPIView,
@@ -45,6 +45,7 @@ from .viewsets.product.viewsets import (
 from ecommerce.viewsets.order.viewsets import OrderCreateAPIView
 from ecommerce.viewsets.order.admin_viewsets import AdminOrderViewSet, AdminOrderCreateAPIView
 from ecommerce.viewsets.product.viewsets import CurrencyViewSet, FXRateViewSet
+from ecommerce.viewsets.fx_rates_viewsets import FXRateCreateUpdateAPIView
 
 router = DefaultRouter()
 router.register(r"categories", CategoryViewSet, basename="category")
@@ -55,7 +56,7 @@ router.register(r"fxrates", FXRateViewSet, basename="fxrate")
 router.register(r"products", ProductViewSet, basename="product")
 router.register(r"product-prices", ProductPriceViewSet, basename="product-price")
 router.register(r"inventories", InventoryViewSet, basename="inventory")
-router.register(r"product-total-inventories",ProductInventoryViewset,basename="product-total-inventory")
+router.register(r"product-total-inventories", ProductInventoryViewset, basename="product-total-inventory")
 router.register(r"purchases", PurchaseViewSet, basename="purchase")
 router.register(r"last-purchase-prices", LastPurchasePriceViewSet, basename="last-purchase-prices")
 router.register(r"orders", OrderViewSet, basename="order")
@@ -80,9 +81,11 @@ urlpatterns = [
         ProductWithImageListView.as_view(),
         name="products-with-images",
     ),
-    path("v1/active-product-prices/",ActiveProductPriceListView.as_view(),name="active-product-prices"),
-    path("v1/products-with-icon-image/",cache_control(no_cache=True)(cache_page(60*15)(ProductWithIconImageListView.as_view())),name="products-with-icon-image"),
-    path("v1/minimal-products/",ProductMinimalListView.as_view(),name="minimal-products"),
+    path("v1/active-product-prices/", ActiveProductPriceListView.as_view(), name="active-product-prices"),
+    path("v1/products-with-icon-image/",
+         cache_control(no_cache=True)(cache_page(60 * 15)(ProductWithIconImageListView.as_view())),
+         name="products-with-icon-image"),
+    path("v1/minimal-products/", ProductMinimalListView.as_view(), name="minimal-products"),
     path("v1/create-product/", ProductCreationAPIView.as_view(), name="create-product"),
     path(
         "v1/update-product/<int:pk>/",
@@ -119,6 +122,6 @@ urlpatterns = [
         name="create_update_purchases_from_csv",
     ),
     path("v1/create-order/", OrderCreateAPIView.as_view(), name="create_order"),
-    path("v1/admin-create-order/", AdminOrderCreateAPIView.as_view(), name="admin-create-order")
-
+    path("v1/admin-create-order/", AdminOrderCreateAPIView.as_view(), name="admin-create-order"),
+    path("v1/create-or-update-fxrates/", FXRateCreateUpdateAPIView.as_view(), name="create-or-update-fxrates")
 ]
