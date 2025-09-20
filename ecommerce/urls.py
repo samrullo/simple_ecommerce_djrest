@@ -1,5 +1,5 @@
 from django.urls import path, include
-from django.views.decorators.cache import cache_page, never_cache
+from django.views.decorators.cache import cache_page, never_cache,cache_control
 from rest_framework.routers import DefaultRouter
 from .viewsets.user.viewsets import (
     CustomerViewSet,
@@ -81,7 +81,7 @@ urlpatterns = [
         name="products-with-images",
     ),
     path("v1/active-product-prices/",ActiveProductPriceListView.as_view(),name="active-product-prices"),
-    path("v1/products-with-icon-image/",never_cache(cache_page(60*15)(ProductWithIconImageListView.as_view())),name="products-with-icon-image"),
+    path("v1/products-with-icon-image/",cache_control(no_cache=True)(cache_page(60*15)(ProductWithIconImageListView.as_view())),name="products-with-icon-image"),
     path("v1/minimal-products/",ProductMinimalListView.as_view(),name="minimal-products"),
     path("v1/create-product/", ProductCreationAPIView.as_view(), name="create-product"),
     path(
