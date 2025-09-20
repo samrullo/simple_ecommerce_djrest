@@ -4,8 +4,7 @@ import pandas as pd
 from django.utils import timezone
 from django.conf import settings
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
-from django.core.cache import cache
+from django.views.decorators.cache import cache_page, never_cache
 from rest_framework.views import APIView
 from typing import List
 from decimal import Decimal
@@ -114,22 +113,14 @@ class ProductWithImageListView(ListAPIView):
                                                                                           "inventory", "tags")
     serializer_class = ProductWithImageSerializer
 
-
+# Define the key here or in your settings file
 CACHE_KEY_PRODUCTS = "products_with_icon_image"
 
+@method_decorator(cache_page(60 * 15,key_prefix=CACHE_KEY_PRODUCTS), name="dispatch")
 class ProductWithIconImageListView(ListAPIView):
+    queryset = Product.objects.all().select_related("category", "brand").prefetch_related("images")
     serializer_class = ProductWithIconImageSerializer
 
-    def get_queryset(self):
-        products = cache.get(CACHE_KEY_PRODUCTS)
-        if products is None:  # explicit None check
-            products = list(
-                Product.objects
-                .select_related("category", "brand")
-                .prefetch_related("images")
-            )
-            cache.set(CACHE_KEY_PRODUCTS, products, 60 * 15)
-        return products
 
 class ProductImageViewset(viewsets.ModelViewSet):
     queryset = ProductImage.objects.all()
