@@ -3,8 +3,6 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.db.models import Sum
 from django.core.cache import cache
-from django.utils.cache import _generate_cache_key
-from django.test import RequestFactory
 from ecommerce.models import Inventory, ProductInventory,Product
 
 logger = logging.getLogger(__name__)

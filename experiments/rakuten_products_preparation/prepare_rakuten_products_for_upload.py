@@ -5,7 +5,6 @@ from sampytools.list_utils import get_chunked_list
 from sampytools.logging_utils import init_logging
 from sampytools.pandas_utils import create_new_col_based_on_dict
 
-from experiments.rakuten_products_preparation.category_mapping import category_mapping_filename
 
 init_logging(level=logging.INFO)
 
@@ -24,7 +23,6 @@ transdf = pd.read_csv(data_folder / product_translations_filename)
 logging.info(f"There are {len(transdf)} records in translations file")
 
 prodcatdf = pd.read_csv(data_folder / product_categories_filename)
-from sampytools.text_utils import get_delimited_records_from_file
 
 # category_records = get_delimited_records_from_file(
 #     data_folder / product_categories_filename, ","

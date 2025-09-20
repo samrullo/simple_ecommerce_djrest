@@ -13,7 +13,6 @@ from ecommerce.models.users.models import Customer
 from ecommerce.models.accounting.models import Account, JournalEntry, JournalEntryLine
 from ecommerce.viewsets.accounting.viewsets import journal_entry_when_product_is_sold_fifo
 from ecommerce.viewsets.order.utils import convert_price
-from ecommerce.models.order.models import Order
 from ecommerce.serializers import OrderWithItemsSerializer
 
 

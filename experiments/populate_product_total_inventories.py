@@ -1,7 +1,6 @@
 import os
 import logging
 import django
-import datetime
 
 # Set the path to your settings module
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")

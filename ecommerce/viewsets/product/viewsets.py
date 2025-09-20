@@ -4,7 +4,7 @@ import pandas as pd
 from django.utils import timezone
 from django.conf import settings
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page, never_cache
+from django.views.decorators.cache import cache_page
 from rest_framework.views import APIView
 from typing import List
 from decimal import Decimal
@@ -247,38 +247,40 @@ def add_or_update_product(
     return product
 
 
+
+
 def add_or_update_product_price(
-        product: Product, price: str | int | float, currency_code: str
+    product: Product, price: str | int | float, currency_code: str
 ):
     """
-    Create or update product price
-    :param product:
-    :param price:
-    :param currency_code: price currency
-    :return:
+    Close current active price and create a new active price record.
     """
     try:
         currency_obj = Currency.objects.filter(code=currency_code).first()
         new_price = Decimal(price)
+        today = timezone.now().date()
+
+        # Find the current active price
         active_price = ProductPrice.objects.filter(
             product=product, end_date__isnull=True
         ).first()
 
         if active_price:
-            active_price.price = new_price
-            active_price.currency = currency_obj
+            # Close the old active price
+            active_price.end_date = today
             active_price.save()
-        else:
-            ProductPrice.objects.create(
-                product=product,
-                price=new_price,
-                currency=currency_obj,
-                begin_date=timezone.now().date(),
-                end_date=None,
-            )
+
+        # Create new active price
+        ProductPrice.objects.create(
+            product=product,
+            price=new_price,
+            currency=currency_obj,
+            begin_date=today,
+            end_date=None,
+        )
+
     except Exception as e:
         logger.debug(f"Price update error: {e}")
-
 
 class ProductCreationAPIView(APIView):
     parser_classes = [MultiPartParser, FormParser]

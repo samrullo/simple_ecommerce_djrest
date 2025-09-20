@@ -1,5 +1,5 @@
 from django.urls import path, include
-from django.views.decorators.cache import cache_page, never_cache,cache_control
+from django.views.decorators.cache import cache_page, cache_control
 from rest_framework.routers import DefaultRouter
 from .viewsets.user.viewsets import (
     CustomerViewSet,

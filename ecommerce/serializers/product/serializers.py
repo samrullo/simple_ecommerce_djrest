@@ -12,7 +12,7 @@ from ecommerce.models import (
 )
 from ecommerce.models.product.models import Currency, FXRate
 from ecommerce.serializers.user.serializers import CustomerSerializer
-from ecommerce.serializers.inventory.serializers import InventorySerializer,ProductInventorySerializer
+from ecommerce.serializers.inventory.serializers import InventorySerializer
 
 
 class CurrencySerializer(serializers.ModelSerializer):

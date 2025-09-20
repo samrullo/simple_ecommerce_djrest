@@ -26,7 +26,6 @@ logging.info(f"Unmapped original categories {len(unmapped_orig_categories)} : {u
 
 pcdf=pcdf.rename(columns={"category":"old_category"})
 old_to_new_category_mapping={old_cat:new_cat for old_cat,new_cat in zip(cmdf["original_category"],cmdf["mapped_category"])}
-from sampytools.pandas_utils import create_new_col_based_on_dict
 pcdf=create_new_col_based_on_dict(pcdf,"old_category","category",old_to_new_category_mapping)
 pcdf=pcdf.drop("old_category",axis=1)
 new_product_category_filename="product_categories2.csv"
