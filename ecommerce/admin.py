@@ -21,6 +21,7 @@ from .models import (
 
 from ecommerce.models.product.models import Currency, FXRate
 from .models import Account, JournalEntry, JournalEntryLine
+from ecommerce.weight_cost import WeightCost
 
 
 @admin.register(Category)
@@ -177,3 +178,7 @@ class FXRateAdmin(admin.ModelAdmin):
     list_display = ("currency_from", "currency_to", "rate", "start_date", "end_date")
     list_filter = ("currency_from", "currency_to", "start_date")
     search_fields = ("currency_from__code", "currency_to__code")
+
+@admin.register(WeightCost)
+class WeightCostAdmin(admin.ModelAdmin):
+    pass

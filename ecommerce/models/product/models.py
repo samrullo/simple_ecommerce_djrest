@@ -1,9 +1,9 @@
 from django.db import models
 from django.utils import timezone
 from ecommerce.models.users.models import Customer
+from ecommerce.models.audit_mixin import AuditMixin
 
-
-class Currency(models.Model):
+class Currency(AuditMixin):
     code = models.CharField(max_length=3, unique=True)  # e.g., 'USD', 'JPY'
     name = models.CharField(max_length=32)
     symbol = models.CharField(max_length=5, blank=True, null=True)
@@ -14,7 +14,7 @@ class Currency(models.Model):
         return f"{self.code} ({self.name})"
 
 
-class FXRate(models.Model):
+class FXRate(AuditMixin):
     currency_from = models.ForeignKey(
         Currency, related_name="fx_from", on_delete=models.CASCADE
     )
@@ -43,7 +43,7 @@ class FXRate(models.Model):
         return f"{self.currency_from.code}/{self.currency_to.code} @ {self.rate} ({self.start_date} - {self.end_date})"
 
 
-class Category(models.Model):
+class Category(AuditMixin):
     """
     Helps organize products into different categories.
     """
@@ -58,7 +58,7 @@ class Category(models.Model):
         verbose_name_plural = "Categories"
 
 
-class Brand(models.Model):
+class Brand(AuditMixin):
     """
     To associate products with different brands.
     """
@@ -70,7 +70,7 @@ class Brand(models.Model):
         return self.name
 
 
-class Tag(models.Model):
+class Tag(AuditMixin):
     """
     Used to label products (e.g., "new", "bestseller", "discount").
     """
@@ -81,7 +81,7 @@ class Tag(models.Model):
         return self.name
 
 
-class Product(models.Model):
+class Product(AuditMixin):
     """
     Stores information about products available for sale.
     """
@@ -93,14 +93,12 @@ class Product(models.Model):
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
     is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
 
 
-class ProductImage(models.Model):
+class ProductImage(AuditMixin):
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="images"
     )
@@ -111,7 +109,7 @@ class ProductImage(models.Model):
         return self.product.name
 
 
-class ProductPrice(models.Model):
+class ProductPrice(AuditMixin):
     """
     Handles time-based pricing for a product.
     """

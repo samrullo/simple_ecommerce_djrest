@@ -10,6 +10,7 @@ dependencies = [
     "django>=5.2.3",
     "django-allauth==65.4.1",
     "django-cors-headers>=4.7.0",
+    "django-crum>=0.7.9",
     "django-storages>=1.14.6",
     "djangorestframework>=3.16.0",
     "djangorestframework-simplejwt>=5.5.0",

@@ -46,6 +46,7 @@ from ecommerce.viewsets.order.viewsets import OrderCreateAPIView
 from ecommerce.viewsets.order.admin_viewsets import AdminOrderViewSet, AdminOrderCreateAPIView
 from ecommerce.viewsets.product.viewsets import CurrencyViewSet, FXRateViewSet
 from ecommerce.viewsets.fx_rates_viewsets import FXRateCreateUpdateAPIView,FxRateAgainstPrimaryCcyListView, ActiveFXRatesListView
+from ecommerce.weight_cost import WeightCostViewset
 
 router = DefaultRouter()
 router.register(r"categories", CategoryViewSet, basename="category")
@@ -73,6 +74,7 @@ router.register(r"journal-entries", JournalEntryViewSet)
 router.register(r"journal-entry-lines", JournalEntryLineViewSet)
 router.register(r"admin-customers", CustomerAdminViewSet, basename="admin-customer")
 router.register(r'admin-orders', AdminOrderViewSet, basename='admin-orders')
+router.register(r"weight-costs",WeightCostViewset,basename="weight-cost")
 
 urlpatterns = [
     path("v1/", include(router.urls)),

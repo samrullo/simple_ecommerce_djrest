@@ -26,3 +26,4 @@ def clear_products_cache(sender, **kwargs):
     cache.delete(CACHE_KEY_PRODUCTS)
     cache.clear()
     logger.debug("All cache is cleared due to Product changes")
+
