@@ -53,8 +53,6 @@ def calculate_and_save_ccy_to_other_ccy_fx_rate(ccy: Currency, other_ccy: Curren
     return new_fx_rate
 
 
-# todo: need to update other currency against currency to update fx rates as well
-# todo : need to introduce PRIMARY_FXRATE_CURRENCY and use that to return fx rates
 def add_or_update_fx_rates_against_non_primary_currency(fx_rate_against_primary: FXRate):
     """
     Update fx rates of other currencies against the currency updated
@@ -127,5 +125,6 @@ class FxRateAgainstPrimaryCcyListView(ListAPIView):
     def get_queryset(self):
         primary_currency_code = settings.PRIMARY_FXRATE_CURRENCY
         primary_currency = Currency.objects.filter(code=primary_currency_code).first()
-        fx_rates_queryset = FXRate.objects.filter(currency_from=primary_currency, end_date__isnull=True).exclude(currency_to=primary_currency)
+        fx_rates_queryset = FXRate.objects.filter(currency_from=primary_currency, end_date__isnull=True).exclude(
+            currency_to=primary_currency)
         return fx_rates_queryset.select_related("currency_from", "currency_to")
