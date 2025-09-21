@@ -79,22 +79,36 @@ def add_or_update_fx_rates_against_non_primary_currency(fx_rate_against_primary:
         logger.debug(f"Created {other_ccy_to_ccy_fx_rate}")
 
 
-def create_or_udpate_fx_rate(fx_rate_data: dict):
-    # we expect currency_from_id, currency_to_id, rate, source to be present in fx_rate_data
-    currency_from = Currency.objects.get(id=fx_rate_data["currency_from_id"])
-    currency_to = Currency.objects.get(id=fx_rate_data["currency_to_id"])
-    active_fx_rate = FXRate.objects.filter(currency_from=currency_from, currency_to=currency_to,
+def create_fx_rate_given_new_rate(currency_from: Currency, currency_to: Currency, new_fx_rate: float,
+                                  fx_rate_source: str = "FXRATESOURCE"):
+    active_fx_rate = FXRate.objects.filter(currency_from=currency_from,
+                                           currency_to=currency_to,
                                            end_date__isnull=True).first()
     if active_fx_rate:
         active_fx_rate.end_date = timezone.now().date()
         active_fx_rate.save()
-    new_fx_rate = FXRate.objects.create(currency_from=currency_from,
-                                        currency_to=currency_to,
-                                        rate=Decimal(fx_rate_data["rate"]),
-                                        start_date=timezone.now().date(),
-                                        source=fx_rate_data.get("source", ""))
-    add_or_update_fx_rates_against_non_primary_currency(new_fx_rate)
-    return new_fx_rate
+    new_fx_rate_obj = FXRate.objects.create(currency_from=currency_from,
+                                            currency_to=currency_to,
+                                            rate=Decimal(new_fx_rate),
+                                            start_date=timezone.now().date(),
+                                            source=fx_rate_source)
+    logger.debug(f"Created new fx rate {new_fx_rate_obj}")
+    return new_fx_rate_obj
+
+
+def create_or_udpate_fx_rate_given_against_primary_ccy_rate(fx_rate_data: dict):
+    # we expect currency_from_id, currency_to_id, rate, source to be present in fx_rate_data
+    currency_from = Currency.objects.get(
+        id=fx_rate_data["currency_from_id"])  # this is expected to match primary currency
+    currency_to = Currency.objects.get(id=fx_rate_data["currency_to_id"])
+    new_against_primary_ccy_rate = create_fx_rate_given_new_rate(currency_from, currency_to,
+                                                                 float(fx_rate_data.get("rate")))
+    add_or_update_fx_rates_against_non_primary_currency(new_against_primary_ccy_rate)
+
+    # also save currency to primary currency rate which is simple the reverse of specified rate in fx_rate_data
+    ccy_to_primary_rate = 1 / float(fx_rate_data.get("rate"))
+    create_fx_rate_given_new_rate(currency_to, currency_from, ccy_to_primary_rate)
+    return new_against_primary_ccy_rate
 
 
 class FXRateCreateUpdateAPIView(APIView):
@@ -104,7 +118,7 @@ class FXRateCreateUpdateAPIView(APIView):
     def post(self, request):
         try:
             logger.debug(f"Incoming data for fx rate update : {request.data}")
-            new_fx_rate = create_or_udpate_fx_rate(request.data)
+            new_fx_rate = create_or_udpate_fx_rate_given_against_primary_ccy_rate(request.data)
             return Response({"message": f"Successfully created {new_fx_rate}"})
         except Exception as e:
             logger.debug(f"Error happened when updating fx rate : {e}")
@@ -112,7 +126,7 @@ class FXRateCreateUpdateAPIView(APIView):
 
     def put(self, request):
         try:
-            new_fx_rate = create_or_udpate_fx_rate(request.data)
+            new_fx_rate = create_or_udpate_fx_rate_given_against_primary_ccy_rate(request.data)
             return Response({"message": f"Successfully created {new_fx_rate}"})
         except Exception as e:
             logger.debug(f"Error happened when updating fx rate : {e}")
@@ -128,3 +142,10 @@ class FxRateAgainstPrimaryCcyListView(ListAPIView):
         fx_rates_queryset = FXRate.objects.filter(currency_from=primary_currency, end_date__isnull=True).exclude(
             currency_to=primary_currency)
         return fx_rates_queryset.select_related("currency_from", "currency_to")
+
+
+class ActiveFXRatesListView(ListAPIView):
+    serializer_class = FXRateSerializer
+
+    def get_queryset(self):
+        return FXRate.objects.filter(end_date__isnull=True)

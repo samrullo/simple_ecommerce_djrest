@@ -45,7 +45,7 @@ from .viewsets.product.viewsets import (
 from ecommerce.viewsets.order.viewsets import OrderCreateAPIView
 from ecommerce.viewsets.order.admin_viewsets import AdminOrderViewSet, AdminOrderCreateAPIView
 from ecommerce.viewsets.product.viewsets import CurrencyViewSet, FXRateViewSet
-from ecommerce.viewsets.fx_rates_viewsets import FXRateCreateUpdateAPIView,FxRateAgainstPrimaryCcyListView
+from ecommerce.viewsets.fx_rates_viewsets import FXRateCreateUpdateAPIView,FxRateAgainstPrimaryCcyListView, ActiveFXRatesListView
 
 router = DefaultRouter()
 router.register(r"categories", CategoryViewSet, basename="category")
@@ -123,6 +123,7 @@ urlpatterns = [
     ),
     path("v1/create-order/", OrderCreateAPIView.as_view(), name="create_order"),
     path("v1/admin-create-order/", AdminOrderCreateAPIView.as_view(), name="admin-create-order"),
+    path("v1/active-fxrates/",ActiveFXRatesListView.as_view(),name="active-fxrates"),
     path("v1/active-fxrates-against-primary-currency/",FxRateAgainstPrimaryCcyListView.as_view(),name="active-fxrates-against-primary-currency"),
     path("v1/create-or-update-fxrates/", FXRateCreateUpdateAPIView.as_view(), name="create-or-update-fxrates")
 ]
