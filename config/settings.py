@@ -18,6 +18,7 @@ from datetime import timedelta
 load_dotenv()
 
 ACCOUNTING_CURRENCY = os.environ.get("ACCOUNTING_CURRENCY")
+PRIMARY_FXRATE_CURRENCY=os.environ.get("PRIMARY_FXRATE_CURRENCY")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
