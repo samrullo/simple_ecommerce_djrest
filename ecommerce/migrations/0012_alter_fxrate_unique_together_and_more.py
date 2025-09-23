@@ -4,22 +4,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ecommerce', '0011_productinventory'),
+        ("ecommerce", "0011_productinventory"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='fxrate',
+            name="fxrate",
             unique_together=set(),
         ),
         migrations.AddConstraint(
-            model_name='fxrate',
-            constraint=models.UniqueConstraint(condition=models.Q(('end_date__isnull', True)), fields=('currency_from', 'currency_to'), name='only_one_active_fxrate_per_currency_pair'),
+            model_name="fxrate",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("end_date__isnull", True)),
+                fields=("currency_from", "currency_to"),
+                name="only_one_active_fxrate_per_currency_pair",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='fxrate',
-            constraint=models.UniqueConstraint(fields=('currency_from', 'currency_to', 'start_date'), name='unique_currency_pair_startdate'),
+            model_name="fxrate",
+            constraint=models.UniqueConstraint(
+                fields=("currency_from", "currency_to", "start_date"),
+                name="unique_currency_pair_startdate",
+            ),
         ),
     ]

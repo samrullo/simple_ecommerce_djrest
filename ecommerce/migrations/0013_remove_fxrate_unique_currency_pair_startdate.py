@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ecommerce', '0012_alter_fxrate_unique_together_and_more'),
+        ("ecommerce", "0012_alter_fxrate_unique_together_and_more"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='fxrate',
-            name='unique_currency_pair_startdate',
+            model_name="fxrate",
+            name="unique_currency_pair_startdate",
         ),
     ]

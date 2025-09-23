@@ -1,7 +1,9 @@
 from django.db import models
 from django.utils import timezone
-from ecommerce.models.users.models import Customer
+
 from ecommerce.models.audit_mixin import AuditMixin
+from ecommerce.models.users.models import Customer
+
 
 class Currency(AuditMixin):
     code = models.CharField(max_length=3, unique=True)  # e.g., 'USD', 'JPY'
@@ -36,7 +38,6 @@ class FXRate(AuditMixin):
                 condition=models.Q(end_date__isnull=True),
                 name="only_one_active_fxrate_per_currency_pair",
             ),
-
         ]
 
     def __str__(self):

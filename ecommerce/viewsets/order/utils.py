@@ -1,7 +1,9 @@
-from typing import Tuple, Dict
+from typing import Dict, Tuple
 
 
-def convert_price(price: float, from_code: str, to_code: str, fx_rates: Dict[Tuple[str, str], float]):
+def convert_price(
+    price: float, from_code: str, to_code: str, fx_rates: Dict[Tuple[str, str], float]
+):
     """
     Convert price from one currency to another
     :param price:

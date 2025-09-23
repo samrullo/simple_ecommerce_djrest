@@ -1,28 +1,32 @@
 from django.contrib import admin
 
+from ecommerce.models.product.models import Currency, FXRate
+from ecommerce.weight_cost import WeightCost
+
 from .models import (
-    Category,
+    Account,
+    Address,
     Brand,
-    Tag,
-    Product,
-    ProductPrice,
-    ProductImage,
+    Category,
+    Customer,
     Inventory,
+    JournalEntry,
+    JournalEntryLine,
     Order,
     OrderItem,
     Payment,
-    Customer,
-    Address,
+    Product,
+    ProductImage,
+    ProductPrice,
     ProductReview,
-    Wishlist,
     Role,
     Staff,
+    Tag,
+    Wishlist,
 )
-
-from ecommerce.models.product.models import Currency, FXRate
-from .models import Account, JournalEntry, JournalEntryLine
-from ecommerce.weight_cost import WeightCost
-
+from ecommerce.profit_rate import ProfitRate
+from ecommerce.income_and_spendings.spendings import SpendingName,Spending
+from ecommerce.income_and_spendings.incomes import IncomeName,Income
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -62,6 +66,7 @@ class ProductAdmin(admin.ModelAdmin):
 class ProductPriceAdmin(admin.ModelAdmin):
     list_display = ["product", "price", "discount_price", "currency"]
     search_fields = ["product__name"]
+
 
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
@@ -179,6 +184,28 @@ class FXRateAdmin(admin.ModelAdmin):
     list_filter = ("currency_from", "currency_to", "start_date")
     search_fields = ("currency_from__code", "currency_to__code")
 
+
 @admin.register(WeightCost)
 class WeightCostAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(ProfitRate)
+class ProfitRateAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(SpendingName)
+class SpendingNameAdmin(admin.ModelAdmin):
+    list_display = ("name", "description", "created_at", "modified_at", "modified_by")
+    readonly_fields = ("created_at", "modified_at", "modified_by")
+
+@admin.register(Spending)
+class SpendingAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(IncomeName)
+class IncomeNameAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Income)
+class IncomeAdmin(admin.ModelAdmin):
     pass

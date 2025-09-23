@@ -1,9 +1,10 @@
+import logging
 import os
 import pathlib
-import logging
+
 import django
-from django.core.files import File
 import pandas as pd
+from django.core.files import File
 
 # Set the path to your settings module
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")

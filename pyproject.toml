@@ -30,3 +30,7 @@ dependencies = [
 
 [tool.setuptools]
 packages = ["ecommerce", "api", "config"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["F403", "F405"]  # you may want to silence * imports if needed

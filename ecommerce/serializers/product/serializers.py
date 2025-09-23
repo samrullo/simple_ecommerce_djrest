@@ -1,18 +1,18 @@
 from rest_framework import serializers
 
 from ecommerce.models import (
-    Category,
     Brand,
-    Tag,
+    Category,
     Product,
     ProductImage,
     ProductPrice,
     ProductReview,
+    Tag,
     Wishlist,
 )
 from ecommerce.models.product.models import Currency, FXRate
-from ecommerce.serializers.user.serializers import CustomerSerializer
 from ecommerce.serializers.inventory.serializers import InventorySerializer
+from ecommerce.serializers.user.serializers import CustomerSerializer
 
 
 class CurrencySerializer(serializers.ModelSerializer):
@@ -92,10 +92,12 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = "__all__"
 
+
 class ProductMinimalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ["id", "name"]
+
 
 class ProductWithImageSerializer(serializers.ModelSerializer):
     # Display nested details for category, brand, and tags (read-only).
@@ -114,6 +116,7 @@ class ProductWithImageSerializer(serializers.ModelSerializer):
         images = obj.images.filter(tag="icon")
         return ProductImageSerializer(images, many=True).data
 
+
 class ProductWithIconImageSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     brand = BrandSerializer(read_only=True)
@@ -121,11 +124,11 @@ class ProductWithIconImageSerializer(serializers.ModelSerializer):
     icon_image = serializers.SerializerMethodField()
 
     class Meta:
-        model=Product
-        fields="__all__"
+        model = Product
+        fields = "__all__"
 
-    def get_icon_image(self,obj):
-        icon_image=obj.images.filter(tag="icon").first()
+    def get_icon_image(self, obj):
+        icon_image = obj.images.filter(tag="icon").first()
         return ProductImageSerializer(icon_image).data
 
 

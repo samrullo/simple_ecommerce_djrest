@@ -5,15 +5,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ecommerce', '0005_order_currency'),
+        ("ecommerce", "0005_order_currency"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='payment',
-            name='order',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='payment', to='ecommerce.order'),
+            model_name="payment",
+            name="order",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="payment",
+                to="ecommerce.order",
+            ),
         ),
     ]

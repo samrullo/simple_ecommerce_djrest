@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from ecommerce.models import Inventory,ProductInventory
+
+from ecommerce.models import Inventory, ProductInventory
 
 
 class InventorySerializer(serializers.ModelSerializer):
@@ -7,7 +8,8 @@ class InventorySerializer(serializers.ModelSerializer):
         model = Inventory
         fields = "__all__"
 
+
 class ProductInventorySerializer(serializers.ModelSerializer):
     class Meta:
-        model=ProductInventory
-        fields="__all__"
+        model = ProductInventory
+        fields = "__all__"

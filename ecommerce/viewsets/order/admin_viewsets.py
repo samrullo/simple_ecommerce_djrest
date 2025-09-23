@@ -1,25 +1,28 @@
-from rest_framework import viewsets
-from rest_framework.decorators import action
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.db import transaction
 from decimal import Decimal
+
+from django.db import transaction
 from django.shortcuts import get_object_or_404
-from ecommerce.models.product.models import Currency, FXRate
-from ecommerce.models.order.models import Order, OrderItem, Payment
-from ecommerce.models.product.models import Product, ProductPrice
-from ecommerce.models.users.models import Customer
+from rest_framework import permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from ecommerce.models.accounting.models import Account, JournalEntry, JournalEntryLine
-from ecommerce.viewsets.accounting.viewsets import journal_entry_when_product_is_sold_fifo
-from ecommerce.viewsets.order.utils import convert_price
+from ecommerce.models.order.models import Order, OrderItem, Payment
+from ecommerce.models.product.models import Currency, FXRate, Product, ProductPrice
+from ecommerce.models.users.models import Customer
 from ecommerce.serializers import OrderWithItemsSerializer
+from ecommerce.viewsets.accounting.viewsets import (
+    journal_entry_when_product_is_sold_fifo,
+)
+from ecommerce.viewsets.order.utils import convert_price
 
 
 class AdminOrderViewSet(viewsets.ModelViewSet):
     """
     Allows admin to view, list, and retrieve orders across all customers.
     """
+
     queryset = Order.objects.select_related(
         "customer__user", "currency"
     ).prefetch_related("items__product", "customer__addresses", "payment")
@@ -34,6 +37,7 @@ class AdminOrderViewSet(viewsets.ModelViewSet):
         order = get_object_or_404(Order, pk=pk)
         serializer = OrderWithItemsSerializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class AdminOrderCreateAPIView(APIView):
     permission_classes = [permissions.IsAdminUser]

@@ -1,29 +1,28 @@
 import logging
-from rest_framework import viewsets, permissions
-from allauth.account.models import EmailConfirmationHMAC
 
-from ecommerce.models import Customer, Address, Role, Staff
+from allauth.account.models import EmailAddress, EmailConfirmationHMAC
+from allauth.account.utils import send_email_confirmation
+from dj_rest_auth.registration.views import RegisterView
+from dj_rest_auth.views import LoginView
+from django.contrib.auth import get_user_model
+from rest_framework import permissions, status, viewsets
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from ecommerce.models import Address, Customer, Role, Staff
 from ecommerce.serializers import (
-    CustomerSerializer,
     AddressSerializer,
+    CustomerSerializer,
     RoleSerializer,
     StaffSerializer,
 )
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.views import APIView
-from allauth.account.utils import send_email_confirmation
-from allauth.account.models import EmailAddress
-from django.contrib.auth import get_user_model
-
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
-from dj_rest_auth.registration.views import RegisterView
-from ecommerce.serializers.user.serializers import CustomRegisterSerializer
-from dj_rest_auth.views import LoginView
-from ecommerce.serializers.user.serializers import CustomUserSerializer
+from ecommerce.serializers.user.serializers import (
+    CustomRegisterSerializer,
+    CustomUserSerializer,
+)
 
 User = get_user_model()
 

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ecommerce', '0009_alter_journalentry_description'),
+        ("ecommerce", "0009_alter_journalentry_description"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='journalentryline',
-            name='description',
+            model_name="journalentryline",
+            name="description",
             field=models.TextField(blank=True),
         ),
     ]

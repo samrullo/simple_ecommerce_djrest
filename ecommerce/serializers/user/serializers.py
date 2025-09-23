@@ -1,11 +1,13 @@
 import logging
-from django.conf import settings
-from dj_rest_auth.registration.serializers import RegisterSerializer
-from rest_framework import serializers
-from ecommerce.models import Customer, Address, Role, Staff
-from django.contrib.auth import get_user_model
+
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.account.models import EmailConfirmation
+from dj_rest_auth.registration.serializers import RegisterSerializer
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
+from ecommerce.models import Address, Customer, Role, Staff
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +137,7 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         return user
 
     def send_confirmation_mail(
-            self, request, emailconfirmation: EmailConfirmation, signup
+        self, request, emailconfirmation: EmailConfirmation, signup
     ):
         """
         Override the confirmation link sent in the email.
@@ -143,7 +145,9 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         logger.debug("CustomAccountAdapter.send_confirmation_mail called")
 
         # 🔗 Build a link to your React frontend
-        react_link = f"https://{settings.SITE_DOMAIN}/verify-email/{emailconfirmation.key}"
+        react_link = (
+            f"https://{settings.SITE_DOMAIN}/verify-email/{emailconfirmation.key}"
+        )
         logger.debug(f"Generated react verification link: {react_link}")
 
         ctx = {

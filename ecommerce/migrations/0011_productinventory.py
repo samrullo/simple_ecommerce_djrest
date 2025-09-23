@@ -5,18 +5,32 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ecommerce', '0010_alter_journalentryline_description'),
+        ("ecommerce", "0010_alter_journalentryline_description"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ProductInventory',
+            name="ProductInventory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('total_inventory', models.PositiveIntegerField(default=0)),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='total_inventory', to='ecommerce.product')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("total_inventory", models.PositiveIntegerField(default=0)),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="total_inventory",
+                        to="ecommerce.product",
+                    ),
+                ),
             ],
         ),
     ]

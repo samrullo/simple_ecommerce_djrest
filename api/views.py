@@ -1,7 +1,8 @@
-from rest_framework import viewsets, mixins
-from rest_framework.response import Response
+from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticated
-from .serializers import DummyProductSerializer, DummyProduct
+from rest_framework.response import Response
+
+from .serializers import DummyProduct, DummyProductSerializer
 
 
 class DummyProductViewset(mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -16,9 +17,9 @@ class DummyProductViewset(mixins.ListModelMixin, viewsets.GenericViewSet):
         return Response({"results": dummy_products_serializer.data})
 
 
+from dj_rest_auth.serializers import UserDetailsSerializer
 from dj_rest_auth.views import LoginView
 from rest_framework_simplejwt.tokens import RefreshToken
-from dj_rest_auth.serializers import UserDetailsSerializer
 
 
 class CustomJWTLoginView(LoginView):

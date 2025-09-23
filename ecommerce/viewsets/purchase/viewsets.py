@@ -1,31 +1,33 @@
 import datetime
+import traceback
 from decimal import Decimal
-from rest_framework import generics
-from rest_framework import viewsets, status
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser, FormParser
-from django.db import transaction
-from django.conf import settings
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from django.db.models.functions import TruncDate
-from django.db.models import Count
-from django.db.models import OuterRef, Subquery
 
 import pandas as pd
-import traceback
-from ecommerce.serializers.purchase.serializers import PurchaseSerializer, LastPurchasePriceSerializer
+from django.conf import settings
+from django.db import transaction
+from django.db.models import Count, OuterRef, Subquery
+from django.db.models.functions import TruncDate
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from rest_framework import generics, status, viewsets
+from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from ecommerce.models import (
-    Product,
-    Purchase,
-    Inventory,
     Account,
+    Inventory,
     JournalEntry,
     JournalEntryLine,
+    Product,
+    Purchase,
 )
 from ecommerce.models.product.models import Currency
 from ecommerce.permissions import IsStaff
+from ecommerce.serializers.purchase.serializers import (
+    LastPurchasePriceSerializer,
+    PurchaseSerializer,
+)
 
 
 class PurchaseViewSet(viewsets.ModelViewSet):
@@ -38,14 +40,15 @@ class LastPurchasePriceViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = LastPurchasePriceSerializer
 
     def get_queryset(self):
-        latest_purchase = Purchase.objects.filter(
-            product=OuterRef("pk")
-        ).order_by("-purchase_datetime")
+        latest_purchase = Purchase.objects.filter(product=OuterRef("pk")).order_by(
+            "-purchase_datetime"
+        )
 
         return Product.objects.annotate(
             last_price=Subquery(latest_purchase.values("price_per_unit")[:1]),
             last_currency_id=Subquery(latest_purchase.values("currency")[:1]),
         )
+
 
 class PurchaseCreateAPIView(APIView):
     permission_classes = [IsStaff]
@@ -332,4 +335,6 @@ class PurchaseDetailByDateAPIView(generics.ListAPIView):
         except ValueError:
             return Purchase.objects.none()
 
-        return Purchase.objects.filter(purchase_datetime__date=date_obj).order_by("purchase_datetime")
+        return Purchase.objects.filter(purchase_datetime__date=date_obj).order_by(
+            "purchase_datetime"
+        )

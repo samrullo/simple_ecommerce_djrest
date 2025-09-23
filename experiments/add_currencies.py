@@ -1,5 +1,6 @@
-import os
 import logging
+import os
+
 import django
 
 # Set the path to your settings module

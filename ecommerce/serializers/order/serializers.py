@@ -1,9 +1,13 @@
 from rest_framework import serializers
-from ecommerce.models import OrderItem, Order, Payment
+
+from ecommerce.models import Order, OrderItem, Payment
 from ecommerce.serializers.product.serializers import (
     CurrencySerializer,
 )
-from ecommerce.serializers.user.serializers import CustomerSerializer,CustomerWithUserSerializer
+from ecommerce.serializers.user.serializers import (
+    CustomerSerializer,
+    CustomerWithUserSerializer,
+)
 
 
 class OrderItemSerializer(serializers.ModelSerializer):

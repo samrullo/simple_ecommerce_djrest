@@ -1,15 +1,16 @@
 import random
 import string
-from rest_framework import viewsets, permissions
+
 from django.contrib.auth import get_user_model
-from rest_framework import serializers
-from ecommerce.models import Customer, Address
+from rest_framework import permissions, serializers, viewsets
+
+from ecommerce.models import Address, Customer
 
 User = get_user_model()
 
 
 def generate_random_password(length=12):
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+    return "".join(random.choices(string.ascii_letters + string.digits, k=length))
 
 
 def generate_unique_email(first_name, last_name):
@@ -44,8 +45,7 @@ class EditableCustomerSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user_data = validated_data.pop("user", {})
         email = user_data.get("email") or generate_unique_email(
-            user_data.get("first_name", "user"),
-            user_data.get("last_name", "unknown")
+            user_data.get("first_name", "user"), user_data.get("last_name", "unknown")
         )
         password = generate_random_password()
         user = User.objects.create_user(
@@ -53,7 +53,7 @@ class EditableCustomerSerializer(serializers.ModelSerializer):
             email=email,
             password=password,
             first_name=user_data.get("first_name", ""),
-            last_name=user_data.get("last_name", "")
+            last_name=user_data.get("last_name", ""),
         )
         phone = validated_data.get("phone", "")
         customer = Customer.objects.create(user=user, phone=phone)
@@ -106,6 +106,8 @@ class EditableCustomerSerializer(serializers.ModelSerializer):
 
 
 class CustomerAdminViewSet(viewsets.ModelViewSet):
-    queryset = Customer.objects.select_related("user").prefetch_related("addresses").all()
+    queryset = (
+        Customer.objects.select_related("user").prefetch_related("addresses").all()
+    )
     serializer_class = EditableCustomerSerializer
     permission_classes = [permissions.IsAdminUser]

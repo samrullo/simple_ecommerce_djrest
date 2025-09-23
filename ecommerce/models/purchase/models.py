@@ -1,6 +1,6 @@
 from django.db import models
 
-from ecommerce.models import Product
+from ecommerce.models.product.models import Product
 from ecommerce.models.product.models import Currency
 
 

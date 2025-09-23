@@ -1,16 +1,21 @@
-from django.db import models
-from django.contrib.auth.models import User
 from crum import get_current_user
+from django.contrib.auth.models import User
+from django.db import models
+
 
 class AuditMixin(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True,null=True,blank=True)   # Set once when created
-    modified_at = models.DateTimeField(auto_now=True,null=True,blank=True)      # Updates on each save
+    created_at = models.DateTimeField(
+        auto_now_add=True, null=True, blank=True
+    )  # Set once when created
+    modified_at = models.DateTimeField(
+        auto_now=True, null=True, blank=True
+    )  # Updates on each save
     modified_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="modified_%(class)ss"
+        related_name="modified_%(class)ss",
     )
 
     class Meta:

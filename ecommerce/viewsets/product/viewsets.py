@@ -1,50 +1,50 @@
 import logging
 import traceback
-import pandas as pd
-from django.utils import timezone
-from django.conf import settings
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page,cache_control
-from rest_framework.views import APIView
-from typing import List
 from decimal import Decimal
+from typing import List
+
+import pandas as pd
+from django.conf import settings
 from django.db import transaction
-from rest_framework import viewsets, status
 from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser, FormParser
-from sampytools.list_utils import get_list_diff
-from ecommerce.permissions import IsStaff
-from ecommerce.permissions import IsStaffOrReadOnly
+from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from rest_framework import status, viewsets
 from rest_framework.generics import ListAPIView
-from ecommerce.models.product.models import Product
-from ecommerce.serializers.product.serializers import ProductWithImageSerializer
+from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from sampytools.list_utils import get_list_diff
 
 from ecommerce.models import (
-    Category,
     Brand,
-    Tag,
+    Category,
     Product,
     ProductImage,
     ProductPrice,
     ProductReview,
+    Tag,
     Wishlist,
 )
-from ecommerce.models.product.models import Currency, FXRate
-from ecommerce.serializers.product.serializers import (
-    CurrencySerializer,
-    FXRateSerializer
-)
+from ecommerce.models.product.models import Currency, FXRate, Product
+from ecommerce.permissions import IsStaff, IsStaffOrReadOnly
 from ecommerce.serializers import (
-    CategorySerializer,
     BrandSerializer,
-    TagSerializer,
-    ProductSerializer,
-    ProductMinimalSerializer,
+    CategorySerializer,
     ProductImageSerializer,
+    ProductMinimalSerializer,
     ProductPriceSerializer,
     ProductReviewSerializer,
-    WishlistSerializer, ProductWithIconImageSerializer,
+    ProductSerializer,
+    ProductWithIconImageSerializer,
+    TagSerializer,
+    WishlistSerializer,
+)
+from ecommerce.serializers.product.serializers import (
+    CurrencySerializer,
+    FXRateSerializer,
+    ProductWithImageSerializer,
 )
 from ecommerce.viewsets.accounting.viewsets import (
     journal_entries_for_direct_inventory_changes,
@@ -93,10 +93,12 @@ class ProductMinimalListView(ListAPIView):
     queryset = Product.objects.filter(is_active=True).only("id", "name")
     serializer_class = ProductMinimalSerializer
 
+
 class ActiveProductPriceListView(ListAPIView):
     """
     Returns only active product prices (end_date is NULL).
     """
+
     serializer_class = ProductPriceSerializer
 
     def get_queryset(self):
@@ -108,13 +110,21 @@ class ActiveProductPriceListView(ListAPIView):
 
 
 class ProductWithImageListView(ListAPIView):
-    queryset = Product.objects.all().select_related("category", "brand").prefetch_related("images", "price",
-                                                                                          "inventory", "tags")
+    queryset = (
+        Product.objects.all()
+        .select_related("category", "brand")
+        .prefetch_related("images", "price", "inventory", "tags")
+    )
     serializer_class = ProductWithImageSerializer
+
 
 @method_decorator(cache_page(60 * 15), name="dispatch")
 class ProductWithIconImageListView(ListAPIView):
-    queryset = Product.objects.all().select_related("category", "brand").prefetch_related("images")
+    queryset = (
+        Product.objects.all()
+        .select_related("category", "brand")
+        .prefetch_related("images")
+    )
     serializer_class = ProductWithIconImageSerializer
 
 
@@ -143,7 +153,7 @@ class WishlistViewSet(viewsets.ModelViewSet):
 
 
 def make_new_product(
-        name, description, category: Category, sku, brand: Brand = None, product_image=None
+    name, description, category: Category, sku, brand: Brand = None, product_image=None
 ) -> Product:
     """
     Make new product
@@ -167,14 +177,14 @@ def make_new_product(
 
 
 def add_or_update_product(
-        category_name: str,
-        brand_name: str = None,
-        tag_names: List[str] = None,
-        pk: int = None,
-        product_name: str = None,
-        product_description: str = None,
-        product_sku: str = None,
-        product_image=None,
+    category_name: str,
+    brand_name: str = None,
+    tag_names: List[str] = None,
+    pk: int = None,
+    product_name: str = None,
+    product_description: str = None,
+    product_sku: str = None,
+    product_image=None,
 ) -> Product:
     """
     Add or update product
@@ -243,8 +253,6 @@ def add_or_update_product(
     return product
 
 
-
-
 def add_or_update_product_price(
     product: Product, price: str | int | float, currency_code: str
 ):
@@ -277,6 +285,7 @@ def add_or_update_product_price(
 
     except Exception as e:
         logger.debug(f"Price update error: {e}")
+
 
 class ProductCreationAPIView(APIView):
     parser_classes = [MultiPartParser, FormParser]

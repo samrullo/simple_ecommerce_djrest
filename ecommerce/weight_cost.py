@@ -1,7 +1,10 @@
 from django.db import models
-from rest_framework import serializers
-from rest_framework.viewsets import ModelViewSet
 from django.utils import timezone
+from rest_framework import serializers, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
+
 from ecommerce.models.audit_mixin import AuditMixin
 from ecommerce.models.product.models import Currency
 from ecommerce.serializers.product.serializers import CurrencySerializer
@@ -18,18 +21,42 @@ class WeightCost(AuditMixin):
 
     class Meta:
         ordering = ["-start_date"]
-        constraints = [models.UniqueConstraint(fields=["cost_per_kg"],
-                                               condition=models.Q(end_date__isnull=True),
-                                               name="only_one_active_weight_cost")]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["cost_per_kg"],
+                condition=models.Q(end_date__isnull=True),
+                name="only_one_active_weight_cost_global",
+            )
+        ]
 
 
 class WeightCostSerializer(serializers.ModelSerializer):
-    currency = CurrencySerializer
+    weight_cost_currency = serializers.SerializerMethodField()
+
+    def get_weight_cost_currency(self, obj):
+        return CurrencySerializer(obj.currency).data
 
     class Meta:
         model = WeightCost
         fields = "__all__"
 
+
 class WeightCostViewset(ModelViewSet):
     serializer_class = WeightCostSerializer
     queryset = WeightCost.objects.all()
+
+
+class ActiveWeightCostView(APIView):
+    """
+    Returns the single active WeightCost (end_date is NULL).
+    """
+
+    def get(self, request):
+        active_record = WeightCost.objects.filter(end_date__isnull=True).first()
+        if not active_record:
+            return Response(
+                {"detail": "No active weight cost found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = WeightCostSerializer(active_record)
+        return Response(serializer.data)

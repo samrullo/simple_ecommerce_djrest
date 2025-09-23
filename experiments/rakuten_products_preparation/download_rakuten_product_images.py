@@ -1,11 +1,12 @@
 import logging
 import pathlib
-from tqdm import tqdm
-import requests
+
 import pandas as pd
+import requests
 from sampytools.logging_utils import init_logging
 from sampytools.pandas_utils import create_new_col_based_on_dict
 from sampytools.text_utils import extract_words_from_text_and_join_with_char
+from tqdm import tqdm
 
 init_logging(level=logging.INFO)
 
