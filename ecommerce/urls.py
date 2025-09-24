@@ -15,7 +15,7 @@ from ecommerce.viewsets.order.admin_viewsets import (
 from ecommerce.viewsets.order.viewsets import OrderCreateAPIView
 from ecommerce.viewsets.product.viewsets import CurrencyViewSet, FXRateViewSet
 from ecommerce.viewsets.user.admin_viewsets import CustomerAdminViewSet
-from ecommerce.weight_cost import ActiveWeightCostView, WeightCostViewset
+from ecommerce.weight_cost import ActiveWeightCostView, WeightCostViewset,CreateUpdateWeightCost
 
 from .viewsets.accounting.viewsets import (
     AccountViewSet,
@@ -183,4 +183,5 @@ urlpatterns = [
         ActiveProfitRateView.as_view(),
         name="active-profit-rate",
     ),
+    path("v1/create-or-update-weight-cost/",CreateUpdateWeightCost.as_view(),name="create-or-update-weight-cost")
 ]
