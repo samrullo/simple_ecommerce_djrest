@@ -122,6 +122,7 @@ urlpatterns = [
         ProductMinimalListView.as_view(),
         name="minimal-products",
     ),
+
     path("v1/create-product/", ProductCreationAPIView.as_view(), name="create-product"),
     path(
         "v1/update-product/<int:pk>/",

@@ -1,6 +1,7 @@
 import logging
 
 from rest_framework import viewsets
+from rest_framework.generics import ListAPIView
 
 from ecommerce.models.inventory.models import Inventory, ProductInventory
 from ecommerce.permissions import IsStaff
