@@ -2,7 +2,7 @@ from django.urls import include, path
 from django.views.decorators.cache import cache_control, cache_page
 from rest_framework.routers import DefaultRouter
 
-from ecommerce.profit_rate import ActiveProfitRateView, ProfitRateViewSet
+from ecommerce.profit_rate import ActiveProfitRateView, ProfitRateViewSet,CreateUpdateProfitRate
 from ecommerce.viewsets.fx_rates_viewsets import (
     ActiveFXRatesListView,
     FxRateAgainstPrimaryCcyListView,
@@ -184,5 +184,6 @@ urlpatterns = [
         ActiveProfitRateView.as_view(),
         name="active-profit-rate",
     ),
-    path("v1/create-or-update-weight-cost/",CreateUpdateWeightCost.as_view(),name="create-or-update-weight-cost")
+    path("v1/create-or-update-weight-cost/",CreateUpdateWeightCost.as_view(),name="create-or-update-weight-cost"),
+    path("v1/create-or-update-profit-rate/",CreateUpdateProfitRate.as_view(),name="create-or-update-profit-rate")
 ]
