@@ -1,4 +1,5 @@
 import logging
+from django.conf import settings
 from decimal import Decimal
 
 from django.utils import timezone
@@ -87,6 +88,7 @@ def journal_entries_for_direct_inventory_changes(
             product=product,
             quantity=quantity_diff,
             price_per_unit=unit_price,
+            currency=price_obj.currency if price_obj else settings.ACCOUNTING_CURRENCY,
             purchase_datetime=timezone.now(),
         )
         inventory_record = Inventory.objects.create(

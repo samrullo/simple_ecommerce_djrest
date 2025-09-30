@@ -58,6 +58,7 @@ from .viewsets.user.viewsets import (
 
 from ecommerce.income_and_spendings.spendings import SpendingNameViewSet,SpendingViewSet
 from ecommerce.income_and_spendings.incomes import IncomeNameViewSet,IncomeViewSet
+from ecommerce.viewsets.purchase_order_viewsets import AdminPurchaseAndOrderAPIView
 
 router = DefaultRouter()
 router.register(r"categories", CategoryViewSet, basename="category")
@@ -185,5 +186,6 @@ urlpatterns = [
         name="active-profit-rate",
     ),
     path("v1/create-or-update-weight-cost/",CreateUpdateWeightCost.as_view(),name="create-or-update-weight-cost"),
-    path("v1/create-or-update-profit-rate/",CreateUpdateProfitRate.as_view(),name="create-or-update-profit-rate")
+    path("v1/create-or-update-profit-rate/",CreateUpdateProfitRate.as_view(),name="create-or-update-profit-rate"),
+    path("v1/create-purchase-order/",AdminPurchaseAndOrderAPIView.as_view(),name="create-purchase-order")
 ]
