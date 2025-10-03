@@ -90,8 +90,14 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 
 class ProductMinimalListView(ListAPIView):
-    queryset = Product.objects.filter(is_active=True).only("id", "name")
     serializer_class = ProductMinimalSerializer
+
+    def get_queryset(self):
+        queryset=Product.objects.filter(is_active=True)
+        product_id=self.request.query_params.get("product_id")
+        if product_id:
+            queryset=queryset.filter(id=product_id)
+        return queryset.only("id","name")
 
 
 class ActiveProductPriceListView(ListAPIView):
@@ -120,13 +126,14 @@ class ProductWithImageListView(ListAPIView):
 
 @method_decorator(cache_page(60 * 15), name="dispatch")
 class ProductWithIconImageListView(ListAPIView):
-    queryset = (
-        Product.objects.all()
-        .select_related("category", "brand")
-        .prefetch_related("images")
-    )
     serializer_class = ProductWithIconImageSerializer
 
+    def get_queryset(self):
+        queryset = Product.objects.all()
+        product_id = self.request.query_params.get("product_id")
+        if product_id:
+            queryset = queryset.filter(id=product_id)
+        return queryset.select_related("category", "brand").prefetch_related("images")
 
 class ProductImageViewset(viewsets.ModelViewSet):
     queryset = ProductImage.objects.all()
@@ -153,7 +160,7 @@ class WishlistViewSet(viewsets.ModelViewSet):
 
 
 def make_new_product(
-    name, description, category: Category, sku, brand: Brand = None, product_image=None
+        name, description, category: Category, sku, brand: Brand = None, product_image=None
 ) -> Product:
     """
     Make new product
@@ -177,14 +184,14 @@ def make_new_product(
 
 
 def add_or_update_product(
-    category_name: str,
-    brand_name: str = None,
-    tag_names: List[str] = None,
-    pk: int = None,
-    product_name: str = None,
-    product_description: str = None,
-    product_sku: str = None,
-    product_image=None,
+        category_name: str,
+        brand_name: str = None,
+        tag_names: List[str] = None,
+        pk: int = None,
+        product_name: str = None,
+        product_description: str = None,
+        product_sku: str = None,
+        product_image=None,
 ) -> Product:
     """
     Add or update product
@@ -254,7 +261,7 @@ def add_or_update_product(
 
 
 def add_or_update_product_price(
-    product: Product, price: str | int | float, currency_code: str
+        product: Product, price: str | int | float, currency_code: str
 ):
     """
     Close current active price and create a new active price record.

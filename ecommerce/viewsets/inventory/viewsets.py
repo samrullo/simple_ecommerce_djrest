@@ -17,5 +17,11 @@ class InventoryViewSet(viewsets.ModelViewSet):
 
 
 class ProductInventoryViewset(viewsets.ModelViewSet):
-    queryset = ProductInventory.objects.all()
     serializer_class = ProductInventorySerializer
+
+    def get_queryset(self):
+        queryset = ProductInventory.objects.all()
+        product_id=self.request.query_params.get("product_id")
+        if product_id:
+            queryset=queryset.filter(product=product_id)
+        return queryset
