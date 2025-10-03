@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from rest_framework.parsers import JSONParser
-
+from ecommerce.permissions import IsStaff
 from ecommerce.models import (
     Product, Purchase, Inventory, Order, OrderItem,
     ProductPrice, Currency, Customer, Payment,
@@ -23,7 +23,7 @@ class AdminPurchaseAndOrderAPIView(APIView):
     Admin creates purchase and order simultaneously via JSON payload.
     Accepts currency IDs instead of codes.
     """
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsStaff]
     parser_classes = [JSONParser]
 
     def post(self, request):

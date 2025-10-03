@@ -53,5 +53,5 @@ class LastPurchasePriceSerializer(serializers.ModelSerializer):
 
         if obj.last_currency_id:
             currency = Currency.objects.get(id=obj.last_currency_id)
-            return {"code": currency.code, "name": currency.name}
+            return {"id":currency.id,"code": currency.code, "name": currency.name}
         return None
