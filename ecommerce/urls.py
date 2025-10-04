@@ -2,7 +2,7 @@ from django.urls import include, path
 from django.views.decorators.cache import cache_control, cache_page
 from rest_framework.routers import DefaultRouter
 
-from ecommerce.profit_rate import ActiveProfitRateView, ProfitRateViewSet,CreateUpdateProfitRate
+from ecommerce.profit_rate import ActiveProfitRateView, ProfitRateViewSet, CreateUpdateProfitRate
 from ecommerce.viewsets.fx_rates_viewsets import (
     ActiveFXRatesListView,
     FxRateAgainstPrimaryCcyListView,
@@ -15,7 +15,7 @@ from ecommerce.viewsets.order.admin_viewsets import (
 from ecommerce.viewsets.order.viewsets import OrderCreateAPIView
 from ecommerce.viewsets.product.viewsets import CurrencyViewSet, FXRateViewSet
 from ecommerce.viewsets.user.admin_viewsets import CustomerAdminViewSet
-from ecommerce.weight_cost import ActiveWeightCostView, WeightCostViewset,CreateUpdateWeightCost
+from ecommerce.weight_cost import ActiveWeightCostView, WeightCostViewset, CreateUpdateWeightCost
 
 from .viewsets.accounting.viewsets import (
     AccountViewSet,
@@ -39,6 +39,7 @@ from .viewsets.product.viewsets import (
     ProductWithImageListView,
     TagViewSet,
     WishlistViewSet,
+    ProductImageViewset
 )
 from .viewsets.purchase.viewsets import (
     LastPurchasePriceViewSet,
@@ -56,8 +57,8 @@ from .viewsets.user.viewsets import (
     StaffViewSet,
 )
 
-from ecommerce.income_and_spendings.spendings import SpendingNameViewSet,SpendingViewSet
-from ecommerce.income_and_spendings.incomes import IncomeNameViewSet,IncomeViewSet
+from ecommerce.income_and_spendings.spendings import SpendingNameViewSet, SpendingViewSet
+from ecommerce.income_and_spendings.incomes import IncomeNameViewSet, IncomeViewSet
 from ecommerce.viewsets.purchase_order_viewsets import AdminPurchaseAndOrderAPIView
 
 router = DefaultRouter()
@@ -69,6 +70,7 @@ router.register(r"fxrates", FXRateViewSet, basename="fxrate")
 router.register(r"products", ProductViewSet, basename="product")
 router.register(r"product-prices", ProductPriceViewSet, basename="product-price")
 router.register(r"inventories", InventoryViewSet, basename="inventory")
+router.register(r"product-images",ProductImageViewset,basename="product-image")
 router.register(
     r"product-total-inventories",
     ProductInventoryViewset,
@@ -94,10 +96,10 @@ router.register(r"admin-customers", CustomerAdminViewSet, basename="admin-custom
 router.register(r"admin-orders", AdminOrderViewSet, basename="admin-orders")
 router.register(r"weight-costs", WeightCostViewset, basename="weight-cost")
 router.register(r"profit-rates", ProfitRateViewSet, basename="profit-rate")
-router.register(r"income-names",IncomeNameViewSet,basename="income-name")
-router.register(r"incomes",IncomeViewSet,basename="income")
-router.register(r"spending-names",SpendingNameViewSet,basename="spending-name")
-router.register(r"spendings",SpendingViewSet,basename="spending")
+router.register(r"income-names", IncomeNameViewSet, basename="income-name")
+router.register(r"incomes", IncomeViewSet, basename="income")
+router.register(r"spending-names", SpendingNameViewSet, basename="spending-name")
+router.register(r"spendings", SpendingViewSet, basename="spending")
 
 urlpatterns = [
     path("v1/", include(router.urls)),
@@ -185,7 +187,7 @@ urlpatterns = [
         ActiveProfitRateView.as_view(),
         name="active-profit-rate",
     ),
-    path("v1/create-or-update-weight-cost/",CreateUpdateWeightCost.as_view(),name="create-or-update-weight-cost"),
-    path("v1/create-or-update-profit-rate/",CreateUpdateProfitRate.as_view(),name="create-or-update-profit-rate"),
-    path("v1/create-purchase-order/",AdminPurchaseAndOrderAPIView.as_view(),name="create-purchase-order")
+    path("v1/create-or-update-weight-cost/", CreateUpdateWeightCost.as_view(), name="create-or-update-weight-cost"),
+    path("v1/create-or-update-profit-rate/", CreateUpdateProfitRate.as_view(), name="create-or-update-profit-rate"),
+    path("v1/create-purchase-order/", AdminPurchaseAndOrderAPIView.as_view(), name="create-purchase-order")
 ]

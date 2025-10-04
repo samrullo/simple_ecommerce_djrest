@@ -136,9 +136,15 @@ class ProductWithIconImageListView(ListAPIView):
         return queryset.select_related("category", "brand").prefetch_related("images")
 
 class ProductImageViewset(viewsets.ModelViewSet):
-    queryset = ProductImage.objects.all()
     serializer_class = ProductImageSerializer
     permission_classes = [IsStaffOrReadOnly]
+
+    def get_queryset(self):
+        queryset = ProductImage.objects.all()
+        product_id=self.request.query_params.get("product_id")
+        if product_id:
+            queryset=queryset.filter(product=product_id)
+        return queryset
 
 
 class ProductPriceViewSet(viewsets.ModelViewSet):
