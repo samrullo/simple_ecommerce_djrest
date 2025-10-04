@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal
 from django.utils import timezone
 from django.db import transaction
@@ -17,6 +18,8 @@ from ecommerce.viewsets.accounting.viewsets import (
     journal_entry_when_product_is_sold_fifo,
 )
 
+logger=logging.getLogger(__name__)
+
 
 class AdminPurchaseAndOrderAPIView(APIView):
     """
@@ -29,6 +32,7 @@ class AdminPurchaseAndOrderAPIView(APIView):
     def post(self, request):
         try:
             data = request.data
+            logger.debug(f"Incoming data for AdminPurchaseAndOrderAPIView : {data}")
 
             # --- Purchase inputs ---
             product_id = data.get("product_id")
@@ -178,4 +182,5 @@ class AdminPurchaseAndOrderAPIView(APIView):
                 )
 
         except Exception as e:
+            logger.debug(f"Error while creating purchase and order : {e}")
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
