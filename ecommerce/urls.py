@@ -37,6 +37,7 @@ from .viewsets.product.viewsets import (
     ProductViewSet,
     ProductWithIconImageListView,
     ProductWithImageListView,
+ProductWeightViewSet,
     TagViewSet,
     WishlistViewSet,
     ProductImageViewset
@@ -71,6 +72,7 @@ router.register(r"products", ProductViewSet, basename="product")
 router.register(r"product-prices", ProductPriceViewSet, basename="product-price")
 router.register(r"inventories", InventoryViewSet, basename="inventory")
 router.register(r"product-images",ProductImageViewset,basename="product-image")
+router.register(r"product-weights",ProductWeightViewSet,basename="product-weight")
 router.register(
     r"product-total-inventories",
     ProductInventoryViewset,

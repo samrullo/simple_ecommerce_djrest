@@ -6,6 +6,7 @@ from ecommerce.models import (
     Product,
     ProductImage,
     ProductPrice,
+    ProductWeight,
     ProductReview,
     Tag,
     Wishlist,
@@ -130,6 +131,15 @@ class ProductWithIconImageSerializer(serializers.ModelSerializer):
     def get_icon_image(self, obj):
         icon_image = obj.images.filter(tag="icon").first()
         return ProductImageSerializer(icon_image).data
+
+
+class ProductWeightSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source="product.name", read_only=True)
+
+    class Meta:
+        model = ProductWeight
+        fields = ["id", "product", "product_name", "weight", "created_at", "modified_at", "modified_by"]
+        read_only_fields = ["created_at", "modified_at", "modified_by"]
 
 
 class ProductReviewSerializer(serializers.ModelSerializer):

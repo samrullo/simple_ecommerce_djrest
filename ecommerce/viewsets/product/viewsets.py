@@ -23,6 +23,7 @@ from ecommerce.models import (
     Product,
     ProductImage,
     ProductPrice,
+ProductWeight,
     ProductReview,
     Tag,
     Wishlist,
@@ -38,6 +39,7 @@ from ecommerce.serializers import (
     ProductReviewSerializer,
     ProductSerializer,
     ProductWithIconImageSerializer,
+ProductWeightSerializer,
     TagSerializer,
     WishlistSerializer,
 )
@@ -152,6 +154,11 @@ class ProductPriceViewSet(viewsets.ModelViewSet):
     serializer_class = ProductPriceSerializer
     permission_classes = [IsStaffOrReadOnly]
 
+
+class ProductWeightViewSet(viewsets.ModelViewSet):
+    queryset = ProductWeight.objects.all()
+    serializer_class = ProductWeightSerializer
+    permission_classes = [IsStaffOrReadOnly]
 
 class ProductReviewViewSet(viewsets.ModelViewSet):
     queryset = ProductReview.objects.all()

@@ -139,6 +139,34 @@ class ProductPrice(AuditMixin):
         return f"{self.product.name} - {self.price} {self.currency} ({self.begin_date} to {self.end_date or 'ongoing'})"
 
 
+class ProductWeight(AuditMixin):
+    """
+    Stores the weight (in kilograms) for a specific product.
+    Each product can have one or more historical weights if needed.
+    """
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="weights",
+        help_text="The product this weight record belongs to."
+    )
+    weight = models.FloatField(help_text="Weight in kilograms")
+
+    class Meta:
+        verbose_name = "Product Weight"
+        verbose_name_plural = "Product Weights"
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["product"],
+                name="unique_product_weight"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.product.name} - {self.weight} kg"
+
+
 class ProductReview(models.Model):
     """
     Allows customers to leave reviews.

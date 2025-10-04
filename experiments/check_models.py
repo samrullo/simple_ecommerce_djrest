@@ -10,6 +10,7 @@ django.setup()
 
 from ecommerce.models.inventory.models import Inventory
 from ecommerce.models.product.models import Product, ProductImage
+from ecommerce.models.order.models import Payment
 
 inventories = Inventory.objects.all()
 print(f"inventories : {len(inventories)}")
