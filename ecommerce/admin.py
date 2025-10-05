@@ -18,6 +18,7 @@ from .models import (
     Product,
     ProductImage,
     ProductPrice,
+ProductWeight,
     ProductReview,
     Role,
     Staff,
@@ -209,3 +210,7 @@ class IncomeNameAdmin(admin.ModelAdmin):
 @admin.register(Income)
 class IncomeAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(ProductWeight)
+class ProductWeightAdmin(admin.ModelAdmin):
+    readonly_fields = ("created_at", "modified_at", "modified_by")
