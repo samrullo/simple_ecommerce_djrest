@@ -252,8 +252,6 @@ def add_or_update_product(
             product.category = category
         if brand:
             product.brand = brand
-        # updated at now
-        product.updated_at = timezone.now()
         product.save()
 
     else:
@@ -487,7 +485,7 @@ class ProductCreateUpdateFromCSVAPIView(APIView):
                         product, row["stock"], "1200", "2000"
                     )
                 logger.debug(
-                    f"Finished creating or updating product with name : {row['product_name']}, category_name : {row['category_name']},brand_name : {brand_name}, tag_names : {tag_names}, price :{row['price']}, stock : {row['stock']}"
+                    f"Finished creating or updating product with name : {row['product_name']}, category_name : {row['category_name']},brand_name : {brand_name}, tag_names : {tag_names}, price :{row['price']} {currency_code}, stock : {row['stock']}"
                 )
             return Response(
                 {"message": f"Successfully created or updated {len(df)} products"},

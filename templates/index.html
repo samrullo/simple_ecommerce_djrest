@@ -14,31 +14,45 @@
   <div class="container py-5">
     <h1 class="mb-4">Welcome to Simple Ecommerce API</h1>
 
-    <div class="list-group">
-      <a href="/admin/" class="list-group-item list-group-item-action">
-        🛠 Django Admin
-      </a>
-        <a href="/ecommerce/v1/" class="list-group-item list-group-item-action">
-        Ecommerce Endpoints
-      </a>
-      <a href="/ecommerce/v1/products/" class="list-group-item list-group-item-action">
-        📦 Products API
-      </a>
-      <a href="/ecommerce/v1/orders/" class="list-group-item list-group-item-action">
-        🧾 Orders API
-      </a>
-      <a href="/ecommerce/v1/customers/" class="list-group-item list-group-item-action">
-        👤 Customers API
-      </a>
-      <a href="/ecommerce/v1/fxrates/" class="list-group-item list-group-item-action">
-        💱 FX Rates API
-      </a>
+    <div class="list-group mb-4">
+      <!-- Admin and base -->
+      <a href="/admin/" class="list-group-item list-group-item-action">🛠 Django Admin</a>
+      <a href="/ecommerce/v1/" class="list-group-item list-group-item-action">🧭 DRF Router Endpoints</a>
+
+      <!-- Common resources -->
+      <a href="/ecommerce/v1/products-with-images/" class="list-group-item list-group-item-action">🖼 Products with Images</a>
+      <a href="/ecommerce/v1/products-with-icon-image/" class="list-group-item list-group-item-action">🖼 Products with Icon Image</a>
+      <a href="/ecommerce/v1/active-product-prices/" class="list-group-item list-group-item-action">📈 Active Product Prices</a>
+      <a href="/ecommerce/v1/minimal-products/" class="list-group-item list-group-item-action">🧺 Minimal Product List</a>
+      <a href="/ecommerce/v1/create-product/" class="list-group-item list-group-item-action">➕ Create Product</a>
+      <a href="/ecommerce/v1/create-update-products-from-csv/" class="list-group-item list-group-item-action">📥 Upload Products via CSV</a>
+
+      <!-- Purchase-related -->
+      <a href="/ecommerce/v1/purchases-summary-by-date/" class="list-group-item list-group-item-action">🗓 Purchases Summary By Date</a>
+      <a href="/ecommerce/v1/purchases-by-date/2024-01-01" class="list-group-item list-group-item-action">📆 Purchases Detail By Date</a>
+      <a href="/ecommerce/v1/create-purchase/" class="list-group-item list-group-item-action">🛒 Create Purchase</a>
+      <a href="/ecommerce/v1/create-update-purchases-from-csv/" class="list-group-item list-group-item-action">📥 Upload Purchases via CSV</a>
+
+      <!-- Orders -->
+      <a href="/ecommerce/v1/create-order/" class="list-group-item list-group-item-action">🧾 Create Order (User)</a>
+      <a href="/ecommerce/v1/admin-create-order/" class="list-group-item list-group-item-action">🧾 Create Order (Admin)</a>
+      <a href="/ecommerce/v1/create-purchase-order/" class="list-group-item list-group-item-action">💼 Create Purchase + Order (Admin)</a>
+
+      <!-- FX & Currency -->
+      <a href="/ecommerce/v1/active-fxrates/" class="list-group-item list-group-item-action">💱 Active FX Rates</a>
+      <a href="/ecommerce/v1/active-fxrates-against-primary-currency/" class="list-group-item list-group-item-action">📊 FX Rates vs Primary Currency</a>
+      <a href="/ecommerce/v1/create-or-update-fxrates/" class="list-group-item list-group-item-action">🔁 Create or Update FX Rates</a>
+
+      <!-- Weight/Profit -->
+      <a href="/ecommerce/v1/active-weight-cost/" class="list-group-item list-group-item-action">⚖️ Active Weight Cost</a>
+      <a href="/ecommerce/v1/create-or-update-weight-cost/" class="list-group-item list-group-item-action">⚖️ Create/Update Weight Cost</a>
+      <a href="/ecommerce/v1/active-profit-rate/" class="list-group-item list-group-item-action">💰 Active Profit Rate</a>
+      <a href="/ecommerce/v1/create-or-update-profit-rate/" class="list-group-item list-group-item-action">💰 Create/Update Profit Rate</a>
     </div>
 
-    <hr class="my-5">
-
     <p class="text-muted">
-      This is the backend API root. The frontend React app is served separately.
+      This page lists API endpoints for testing or integration.
+      The React frontend is served separately.
     </p>
   </div>
 </body>
