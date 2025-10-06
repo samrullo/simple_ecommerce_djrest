@@ -1,6 +1,9 @@
 from django.contrib import admin
 
+from ecommerce.income_and_spendings.incomes import Income, IncomeName
+from ecommerce.income_and_spendings.spendings import Spending, SpendingName
 from ecommerce.models.product.models import Currency, FXRate
+from ecommerce.profit_rate import ProfitRate
 from ecommerce.weight_cost import WeightCost
 
 from .models import (
@@ -18,16 +21,14 @@ from .models import (
     Product,
     ProductImage,
     ProductPrice,
-ProductWeight,
     ProductReview,
+    ProductWeight,
     Role,
     Staff,
     Tag,
     Wishlist,
 )
-from ecommerce.profit_rate import ProfitRate
-from ecommerce.income_and_spendings.spendings import SpendingName,Spending
-from ecommerce.income_and_spendings.incomes import IncomeName,Income
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):

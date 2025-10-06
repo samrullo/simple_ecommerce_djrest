@@ -1,8 +1,9 @@
+from decimal import Decimal
 from typing import Dict, Tuple
 
 
 def convert_price(
-    price: float, from_code: str, to_code: str, fx_rates: Dict[Tuple[str, str], float]
+    price: float|Decimal, from_code: str, to_code: str, fx_rates: Dict[Tuple[str, str], float]
 ):
     """
     Convert price from one currency to another

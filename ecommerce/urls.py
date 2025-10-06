@@ -2,7 +2,16 @@ from django.urls import include, path
 from django.views.decorators.cache import cache_control, cache_page
 from rest_framework.routers import DefaultRouter
 
-from ecommerce.profit_rate import ActiveProfitRateView, ProfitRateViewSet, CreateUpdateProfitRate
+from ecommerce.income_and_spendings.incomes import IncomeNameViewSet, IncomeViewSet
+from ecommerce.income_and_spendings.spendings import (
+    SpendingNameViewSet,
+    SpendingViewSet,
+)
+from ecommerce.profit_rate import (
+    ActiveProfitRateView,
+    CreateUpdateProfitRate,
+    ProfitRateViewSet,
+)
 from ecommerce.viewsets.fx_rates_viewsets import (
     ActiveFXRatesListView,
     FxRateAgainstPrimaryCcyListView,
@@ -14,8 +23,13 @@ from ecommerce.viewsets.order.admin_viewsets import (
 )
 from ecommerce.viewsets.order.viewsets import OrderCreateAPIView
 from ecommerce.viewsets.product.viewsets import CurrencyViewSet, FXRateViewSet
+from ecommerce.viewsets.purchase_order_viewsets import AdminPurchaseAndOrderAPIView,AdminPurchaseAndOrderFromCSVAPIView
 from ecommerce.viewsets.user.admin_viewsets import CustomerAdminViewSet
-from ecommerce.weight_cost import ActiveWeightCostView, WeightCostViewset, CreateUpdateWeightCost
+from ecommerce.weight_cost import (
+    ActiveWeightCostView,
+    CreateUpdateWeightCost,
+    WeightCostViewset,
+)
 
 from .viewsets.accounting.viewsets import (
     AccountViewSet,
@@ -30,17 +44,17 @@ from .viewsets.product.viewsets import (
     CategoryViewSet,
     ProductCreateUpdateFromCSVAPIView,
     ProductCreationAPIView,
+    ProductImageViewset,
     ProductMinimalListView,
     ProductPriceViewSet,
     ProductReviewViewSet,
     ProductUpdateAPIView,
     ProductViewSet,
+    ProductWeightViewSet,
     ProductWithIconImageListView,
     ProductWithImageListView,
-ProductWeightViewSet,
     TagViewSet,
     WishlistViewSet,
-    ProductImageViewset
 )
 from .viewsets.purchase.viewsets import (
     LastPurchasePriceViewSet,
@@ -57,10 +71,6 @@ from .viewsets.user.viewsets import (
     RoleViewSet,
     StaffViewSet,
 )
-
-from ecommerce.income_and_spendings.spendings import SpendingNameViewSet, SpendingViewSet
-from ecommerce.income_and_spendings.incomes import IncomeNameViewSet, IncomeViewSet
-from ecommerce.viewsets.purchase_order_viewsets import AdminPurchaseAndOrderAPIView
 
 router = DefaultRouter()
 router.register(r"categories", CategoryViewSet, basename="category")
@@ -191,5 +201,6 @@ urlpatterns = [
     ),
     path("v1/create-or-update-weight-cost/", CreateUpdateWeightCost.as_view(), name="create-or-update-weight-cost"),
     path("v1/create-or-update-profit-rate/", CreateUpdateProfitRate.as_view(), name="create-or-update-profit-rate"),
-    path("v1/create-purchase-order/", AdminPurchaseAndOrderAPIView.as_view(), name="create-purchase-order")
+    path("v1/create-purchase-order/", AdminPurchaseAndOrderAPIView.as_view(), name="create-purchase-order"),
+    path("v1/create-purchase-order-from-csv/",AdminPurchaseAndOrderFromCSVAPIView.as_view(),name="create-purchase-order-from-csv")
 ]

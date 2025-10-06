@@ -6,8 +6,8 @@ from ecommerce.models import (
     Product,
     ProductImage,
     ProductPrice,
-    ProductWeight,
     ProductReview,
+    ProductWeight,
     Tag,
     Wishlist,
 )

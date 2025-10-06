@@ -9,8 +9,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
 from ecommerce.models.inventory.models import Inventory
+from ecommerce.models.product.models import Product
 from ecommerce.models.purchase.models import Purchase
-from ecommerce.models.product.models import Product,Currency
 
 inventories = Inventory.objects.all()
 print(f"inventories : {len(inventories)}")

@@ -23,8 +23,8 @@ from ecommerce.models import (
     Product,
     ProductImage,
     ProductPrice,
-ProductWeight,
     ProductReview,
+    ProductWeight,
     Tag,
     Wishlist,
 )
@@ -38,8 +38,8 @@ from ecommerce.serializers import (
     ProductPriceSerializer,
     ProductReviewSerializer,
     ProductSerializer,
+    ProductWeightSerializer,
     ProductWithIconImageSerializer,
-ProductWeightSerializer,
     TagSerializer,
     WishlistSerializer,
 )

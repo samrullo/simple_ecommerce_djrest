@@ -8,9 +8,12 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 # Setup Django
 django.setup()
 
+from django.contrib.auth import get_user_model
+
 from ecommerce.models.inventory.models import Inventory
 from ecommerce.models.product.models import Product, ProductImage
-from ecommerce.models.order.models import Payment
+
+User=get_user_model()
 
 inventories = Inventory.objects.all()
 print(f"inventories : {len(inventories)}")

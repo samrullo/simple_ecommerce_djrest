@@ -1,20 +1,21 @@
 import logging
-from django.conf import settings
 from decimal import Decimal
 
+from django.conf import settings
 from django.utils import timezone
 from rest_framework import permissions, viewsets
 
 from ecommerce.models import (
     Account,
+    Customer,
     Inventory,
     JournalEntry,
     JournalEntryLine,
+    Order,
     Product,
     ProductPrice,
+    Purchase,
 )
-from ecommerce.models.accounting.models import Account, JournalEntry, JournalEntryLine
-from ecommerce.models.purchase.models import Purchase
 from ecommerce.serializers.accounting.serializers import (
     AccountSerializer,
     JournalEntryLineSerializer,
@@ -43,10 +44,10 @@ class JournalEntryLineViewSet(viewsets.ModelViewSet):
 
 
 def journal_entries_for_direct_inventory_changes(
-    product: Product,
-    new_quantity: int,
-    inventory_account_code: str = "1200",
-    accounts_payable_account_code: str = "2000",
+        product: Product,
+        new_quantity: int,
+        inventory_account_code: str = "1200",
+        accounts_payable_account_code: str = "2000",
 ) -> list[Inventory]:
     """
     Adjusts inventory using new model and creates journal entries for direct inventory change.
@@ -221,3 +222,54 @@ def journal_entry_when_product_is_sold_fifo(product: Product, quantity_sold: int
         raise ValueError(f"Not enough inventory to fulfill order for {product.name}")
 
     return total_cost  # useful if you want to save this to the Order record
+
+
+def journal_entry_for_purchase_inventory_increase(product: Product, purchase: Purchase) -> JournalEntry:
+    """
+    Journal entries when product is purchased
+    :param product: Product
+    :param purchase: Purchase
+    :return:
+    """
+    inventory_account = Account.objects.get(code="1200")
+    accounts_payable = Account.objects.get(code="2000")
+    total_purchase_cost = purchase.price_per_unit * purchase.quantity
+    je_purchase = JournalEntry.objects.create(
+        description=f"Purchase of {purchase.quantity} {product.name} at price {purchase.price_per_unit}")
+    JournalEntryLine.objects.create(journal_entry=je_purchase,
+                                    account=inventory_account,
+                                    debit=total_purchase_cost,
+                                    credit=0,
+                                    description="Inventory increase from purchase")
+    JournalEntryLine.objects.create(journal_entry=je_purchase,
+                                    account=accounts_payable,
+                                    debit=0,
+                                    credit=total_purchase_cost,
+                                    description="Accounts Payable increase for purchase")
+    return je_purchase
+
+
+def journal_entry_for_income_increase_when_product_sold(order: Order, customer: Customer,line_total:float|Decimal)->JournalEntry:
+    """
+    Journal entry when product is sold, income increases, cash increases
+    :param order: Order
+    :param customer: Customer
+    :param line_total: order total amount
+    :return:
+    """
+    income_account = Account.objects.get(code="4000")
+    cash_account = Account.objects.get(code="1000")
+
+    je_order = JournalEntry.objects.create(description=f"Order {order.id} for customer {customer.id} {customer.user.username}")
+
+    JournalEntryLine.objects.create(journal_entry=je_order,
+                                    account=cash_account,
+                                    debit=line_total,
+                                    credit=0,
+                                    description="Cash from selling product")
+    JournalEntryLine.objects.create(journal_entry=je_order,
+                                    account=income_account,
+                                    debit=0,
+                                    credit=line_total,
+                                    description="Sales income")
+    return je_order
