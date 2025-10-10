@@ -6,4 +6,6 @@ class EcommerceConfig(AppConfig):
     name = "ecommerce"
 
     def ready(self):
-        pass
+        # Import signal handlers to connect them with Django's signal framework
+        # noqa: F401 (imported for side effects)
+        import ecommerce.signals  # noqa: F401
