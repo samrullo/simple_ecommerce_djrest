@@ -1,5 +1,5 @@
 from decimal import Decimal
-
+from django.utils.dateparse import parse_date
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status, viewsets
@@ -23,11 +23,30 @@ class AdminOrderViewSet(viewsets.ModelViewSet):
     Allows admin to view, list, and retrieve orders across all customers.
     """
 
-    queryset = Order.objects.select_related(
-        "customer__user", "currency"
-    ).prefetch_related("items__product", "customer__addresses", "payment")
     serializer_class = OrderWithItemsSerializer
     permission_classes = [permissions.IsAdminUser]
+
+    def get_queryset(self):
+        queryset = (
+            Order.objects.select_related("customer__user", "currency")
+            .prefetch_related("items__product", "customer__addresses", "payment")
+            .order_by("-created_at")
+        )
+
+        start_date = self.request.query_params.get("start_date")
+        end_date = self.request.query_params.get("end_date")
+
+        if start_date:
+            start_date = parse_date(start_date)
+            if start_date:
+                queryset = queryset.filter(created_at__date__gte=start_date)
+
+        if end_date:
+            end_date = parse_date(end_date)
+            if end_date:
+                queryset = queryset.filter(created_at__date__lte=end_date)
+
+        return queryset
 
     @action(detail=True, methods=["get"], url_path="with-items")
     def retrieve_with_items(self, request, pk=None):

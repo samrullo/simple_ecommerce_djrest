@@ -1,7 +1,7 @@
 import datetime
 import traceback
 from decimal import Decimal
-
+from django.utils.dateparse import parse_date
 import pandas as pd
 from django.conf import settings
 from django.db import transaction
@@ -31,9 +31,25 @@ from ecommerce.serializers.purchase.serializers import (
 
 
 class PurchaseViewSet(viewsets.ModelViewSet):
-    queryset = Purchase.objects.all().order_by("-purchase_datetime")
     serializer_class = PurchaseSerializer
     permission_classes = [IsStaff]
+
+    def get_queryset(self):
+        queryset = Purchase.objects.all().order_by("-purchase_datetime")
+        start_date = self.request.query_params.get("start_date")
+        end_date = self.request.query_params.get("end_date")
+
+        if start_date:
+            start_date = parse_date(start_date)
+            if start_date:
+                queryset = queryset.filter(purchase_datetime__date__gte=start_date)
+
+        if end_date:
+            end_date = parse_date(end_date)
+            if end_date:
+                queryset = queryset.filter(purchase_datetime__date__lte=end_date)
+
+        return queryset
 
 
 class LastPurchasePriceViewSet(viewsets.ReadOnlyModelViewSet):
