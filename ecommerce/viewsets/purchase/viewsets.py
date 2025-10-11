@@ -21,6 +21,7 @@ from ecommerce.models import (
     JournalEntryLine,
     Product,
     Purchase,
+    FXRate
 )
 from ecommerce.models.product.models import Currency
 from ecommerce.permissions import IsStaff
@@ -50,6 +51,46 @@ class PurchaseViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(purchase_datetime__date__lte=end_date)
 
         return queryset
+
+
+class PurchaseTotalInAccountingCurrencyView(APIView):
+    permission_classes = [IsStaff]
+
+    def get(self, request, *args, **kwargs):
+        start_date = parse_date(request.query_params.get("start_date"))
+        end_date = parse_date(request.query_params.get("end_date"))
+
+        purchases = Purchase.objects.select_related("currency").all()
+        if start_date:
+            purchases = purchases.filter(purchase_datetime__date__gte=start_date)
+        if end_date:
+            purchases = purchases.filter(purchase_datetime__date__lte=end_date)
+
+        # Prepare FX rates map: (from_code, to_code) -> rate
+        fx_rates = FXRate.objects.filter(
+            end_date__isnull=True,
+            currency_to__code=settings.ACCOUNTING_CURRENCY
+        ).select_related("currency_from", "currency_to")
+
+        fx_map = {
+            (fx.currency_from.code, fx.currency_to.code): Decimal(fx.rate)
+            for fx in fx_rates
+        }
+
+        total_amount = Decimal("0.00")
+        for p in purchases:
+            from_code = p.currency.code if p.currency else None
+            to_code = settings.ACCOUNTING_CURRENCY
+            rate = fx_map.get((from_code, to_code), Decimal("1.0") if from_code == to_code else None)
+
+            if rate is None:
+                continue  # skip if FX rate missing
+            total_amount += Decimal(p.quantity) * p.price_per_unit * rate
+
+        return Response({
+            "amount": round(total_amount, 2),
+            "currency": settings.ACCOUNTING_CURRENCY,
+        })
 
 
 class LastPurchasePriceViewSet(viewsets.ReadOnlyModelViewSet):

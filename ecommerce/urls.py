@@ -2,10 +2,11 @@ from django.urls import include, path
 from django.views.decorators.cache import cache_control, cache_page
 from rest_framework.routers import DefaultRouter
 
-from ecommerce.income_and_spendings.incomes import IncomeNameViewSet, IncomeViewSet
+from ecommerce.income_and_spendings.incomes import IncomeNameViewSet, IncomeViewSet, IncomeTotalInAccountingCurrencyView
 from ecommerce.income_and_spendings.spendings import (
     SpendingNameViewSet,
     SpendingViewSet,
+    SpendingTotalInAccountingCurrencyView
 )
 from ecommerce.profit_rate import (
     ActiveProfitRateView,
@@ -20,10 +21,11 @@ from ecommerce.viewsets.fx_rates_viewsets import (
 from ecommerce.viewsets.order.admin_viewsets import (
     AdminOrderCreateAPIView,
     AdminOrderViewSet,
+    OrderTotalInAccountingCurrencyView
 )
 from ecommerce.viewsets.order.viewsets import OrderCreateAPIView
 from ecommerce.viewsets.product.viewsets import CurrencyViewSet, FXRateViewSet
-from ecommerce.viewsets.purchase_order_viewsets import AdminPurchaseAndOrderAPIView,AdminPurchaseAndOrderFromCSVAPIView
+from ecommerce.viewsets.purchase_order_viewsets import AdminPurchaseAndOrderAPIView, AdminPurchaseAndOrderFromCSVAPIView
 from ecommerce.viewsets.user.admin_viewsets import CustomerAdminViewSet
 from ecommerce.weight_cost import (
     ActiveWeightCostView,
@@ -64,6 +66,7 @@ from .viewsets.purchase.viewsets import (
     PurchaseSummaryByDateAPIView,
     PurchaseUpdateAPIView,
     PurchaseViewSet,
+    PurchaseTotalInAccountingCurrencyView
 )
 from .viewsets.user.viewsets import (
     AddressViewSet,
@@ -81,8 +84,8 @@ router.register(r"fxrates", FXRateViewSet, basename="fxrate")
 router.register(r"products", ProductViewSet, basename="product")
 router.register(r"product-prices", ProductPriceViewSet, basename="product-price")
 router.register(r"inventories", InventoryViewSet, basename="inventory")
-router.register(r"product-images",ProductImageViewset,basename="product-image")
-router.register(r"product-weights",ProductWeightViewSet,basename="product-weight")
+router.register(r"product-images", ProductImageViewset, basename="product-image")
+router.register(r"product-weights", ProductWeightViewSet, basename="product-weight")
 router.register(
     r"product-total-inventories",
     ProductInventoryViewset,
@@ -202,5 +205,15 @@ urlpatterns = [
     path("v1/create-or-update-weight-cost/", CreateUpdateWeightCost.as_view(), name="create-or-update-weight-cost"),
     path("v1/create-or-update-profit-rate/", CreateUpdateProfitRate.as_view(), name="create-or-update-profit-rate"),
     path("v1/create-purchase-order/", AdminPurchaseAndOrderAPIView.as_view(), name="create-purchase-order"),
-    path("v1/create-purchase-order-from-csv/",AdminPurchaseAndOrderFromCSVAPIView.as_view(),name="create-purchase-order-from-csv")
+    path("v1/create-purchase-order-from-csv/", AdminPurchaseAndOrderFromCSVAPIView.as_view(),
+         name="create-purchase-order-from-csv"),
+    path("v1/purchase-total-in-accounting-currency/", PurchaseTotalInAccountingCurrencyView.as_view(),
+         name="purchase-total-in-accounting-currency"),
+    path("v1/order-total-in-accounting-currency/", OrderTotalInAccountingCurrencyView.as_view(),
+         name="order-total-in-accounting-currency"),
+    path("v1/spending-total-in-accounting-currency/", SpendingTotalInAccountingCurrencyView.as_view(),
+         name="spending-total-in-accounting-currency"),
+    path("v1/income-total-in-accounting-currency/", IncomeTotalInAccountingCurrencyView.as_view(),
+         name="income-total-in-accounting-currency"),
+
 ]

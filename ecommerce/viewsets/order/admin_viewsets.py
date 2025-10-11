@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.conf import settings
 from django.utils.dateparse import parse_date
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -11,6 +12,7 @@ from ecommerce.models.accounting.models import Account, JournalEntry, JournalEnt
 from ecommerce.models.order.models import Order, OrderItem, Payment
 from ecommerce.models.product.models import Currency, FXRate, Product, ProductPrice
 from ecommerce.models.users.models import Customer
+from ecommerce.permissions import IsStaff
 from ecommerce.serializers import OrderWithItemsSerializer
 from ecommerce.viewsets.accounting.viewsets import (
     journal_entry_when_product_is_sold_fifo,
@@ -57,6 +59,45 @@ class AdminOrderViewSet(viewsets.ModelViewSet):
         serializer = OrderWithItemsSerializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class OrderTotalInAccountingCurrencyView(APIView):
+    permission_classes = [IsStaff]
+
+    def get(self, request, *args, **kwargs):
+        start_date = parse_date(request.query_params.get("start_date"))
+        end_date = parse_date(request.query_params.get("end_date"))
+
+        orders = Order.objects.select_related("currency").all()
+
+        if start_date:
+            orders = orders.filter(created_at__date__gte=start_date)
+        if end_date:
+            orders = orders.filter(created_at__date__lte=end_date)
+
+        # Build FX rate map to accounting currency
+        fx_rates = FXRate.objects.filter(
+            end_date__isnull=True,
+            currency_to__code=settings.ACCOUNTING_CURRENCY
+        ).select_related("currency_from", "currency_to")
+
+        fx_map = {
+            (fx.currency_from.code, fx.currency_to.code): Decimal(fx.rate)
+            for fx in fx_rates
+        }
+
+        total_amount = Decimal("0.00")
+        for order in orders:
+            from_code = order.currency.code if order.currency else None
+            to_code = settings.ACCOUNTING_CURRENCY
+            rate = fx_map.get((from_code, to_code), Decimal("1.0") if from_code == to_code else None)
+
+            if rate is None:
+                continue  # Skip orders without a valid FX rate
+            total_amount += order.total_amount * rate
+
+        return Response({
+            "amount": round(total_amount, 2),
+            "currency": settings.ACCOUNTING_CURRENCY,
+        })
 
 class AdminOrderCreateAPIView(APIView):
     permission_classes = [permissions.IsAdminUser]
