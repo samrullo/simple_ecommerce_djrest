@@ -17,7 +17,7 @@ from ecommerce.serializers import OrderWithItemsSerializer
 from ecommerce.viewsets.accounting.viewsets import (
     journal_entry_when_product_is_sold_fifo,
 )
-from ecommerce.viewsets.order.utils import convert_price
+from ecommerce.viewsets.utils import convert_amount_from_one_currency_to_another
 
 
 class AdminOrderViewSet(viewsets.ModelViewSet):
@@ -140,7 +140,7 @@ class AdminOrderCreateAPIView(APIView):
                     if not active_price:
                         raise ValueError(f"No active price for product {product.name}")
 
-                    converted_price = convert_price(
+                    converted_price = convert_amount_from_one_currency_to_another(
                         active_price.price,
                         active_price.currency.code,
                         base_currency.code,

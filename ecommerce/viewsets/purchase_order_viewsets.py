@@ -30,7 +30,7 @@ from ecommerce.viewsets.accounting.viewsets import (
     journal_entry_for_purchase_inventory_increase,
     journal_entry_when_product_is_sold_fifo,
 )
-from ecommerce.viewsets.order.utils import convert_price
+from ecommerce.viewsets.utils import convert_amount_from_one_currency_to_another
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +116,7 @@ class AdminPurchaseAndOrderAPIView(APIView):
                     currency=base_currency,
                 )
 
-                converted_price = convert_price(
+                converted_price = convert_amount_from_one_currency_to_another(
                     sold_price, sold_currency.id, base_currency.id, fx_rates
                 )
                 line_total = converted_price * sold_qty
@@ -328,7 +328,7 @@ class AdminPurchaseAndOrderFromCSVAPIView(APIView):
                                 currency=base_currency,
                             )
 
-                            converted_price = convert_price(
+                            converted_price = convert_amount_from_one_currency_to_another(
                                 selling_price,
                                 selling_currency.id,
                                 base_currency.id,

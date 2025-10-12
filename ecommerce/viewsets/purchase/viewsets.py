@@ -13,6 +13,8 @@ from rest_framework import generics, status, viewsets
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from ecommerce.viewsets.utils import get_fx_rates_with_currency_codes, \
+    convert_amount_from_one_currency_code_to_another
 
 from ecommerce.models import (
     Account,
@@ -361,20 +363,37 @@ class PurchaseSummaryByDateAPIView(APIView):
     permission_classes = [IsStaff]
 
     def get(self, request):
-        summary = (
-            Purchase.objects.annotate(purchase_date_only=TruncDate("purchase_datetime"))
-            .values("purchase_date_only")
-            .annotate(num_purchases=Count("id"))
-            .order_by("-purchase_date_only")
-        )
+        purchases = Purchase.objects.all()
+        data = [
+            {
+
+                "quantity": purchase.quantity,
+                "price_per_unit": float(purchase.price_per_unit),
+                "currency": purchase.currency.code if purchase.currency else None,
+                "purchase_date": purchase.purchase_datetime.date(),
+
+            }
+            for purchase in purchases
+        ]
+
+        # Convert to DataFrame
+        fx_rates = get_fx_rates_with_currency_codes()
+        purchasedf = pd.DataFrame(data)
+        purchasedf["currency"] = purchasedf["currency"].fillna(settings.ACCOUNTING_CURRENCY)
+        purchasedf["amount"] = purchasedf["quantity"] * purchasedf["price_per_unit"]
+        purchasedf["amount_in_accounting_currency"] = purchasedf.apply(
+            lambda row: convert_amount_from_one_currency_code_to_another(row["amount"], row["currency"],
+                                                                         settings.ACCOUNTING_CURRENCY, fx_rates),
+            axis=1)
+
+        purchase_sum_df = purchasedf.groupby("purchase_date")[["amount", "amount_in_accounting_currency"]].agg(
+            {"amount": "count", "amount_in_accounting_currency": "sum"}).reset_index()
+        purchase_sum_df.columns=["purchase_date","num_purchases","amount"]
+        purchase_sum_df["currency_code"]=settings.ACCOUNTING_CURRENCY
+        purchase_sum_df=purchase_sum_df.sort_values("purchase_date",ascending=False)
+
         return Response(
-            [
-                {
-                    "purchase_date": item["purchase_date_only"],
-                    "num_purchases": item["num_purchases"],
-                }
-                for item in summary
-            ]
+            purchase_sum_df.to_dict(orient="records")
         )
 
 
