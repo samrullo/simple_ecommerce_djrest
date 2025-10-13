@@ -24,7 +24,6 @@ from ecommerce.viewsets.utils import convert_amount_from_one_currency_to_another
 
 
 class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -32,7 +31,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if user.is_staff or user.is_superuser:
             return Order.objects.all()
-        return Order.objects.filter(customer__user=user)
+        return Order.objects.filter(customer__user=user).order_by("-created_at")
 
     @action(detail=True, methods=["get"], url_path="with-items")
     def retrieve_with_items(self, request, pk=None):
