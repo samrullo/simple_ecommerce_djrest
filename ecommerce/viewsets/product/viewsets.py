@@ -15,6 +15,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
 from sampytools.list_utils import get_list_diff
 
 from ecommerce.models import (
@@ -125,13 +126,26 @@ class ProductWithImageListView(ListAPIView):
     )
     serializer_class = ProductWithImageSerializer
 
+class ProductWithIconImagePagination(PageNumberPagination):
+    page_size = 100
 
 @method_decorator(cache_page(60 * 15), name="dispatch")
 class ProductWithIconImageListView(ListAPIView):
     serializer_class = ProductWithIconImageSerializer
 
     def get_queryset(self):
-        queryset = Product.objects.all()
+        queryset = Product.objects.all().order_by("-created_at")
+        product_id = self.request.query_params.get("product_id")
+        if product_id:
+            queryset = queryset.filter(id=product_id)
+        return queryset.select_related("category", "brand").prefetch_related("images")
+
+class ProductWithIconImagePaginatedListView(ListAPIView):
+    serializer_class = ProductWithIconImageSerializer
+    pagination_class = ProductWithIconImagePagination
+
+    def get_queryset(self):
+        queryset = Product.objects.all().order_by("-created_at")
         product_id = self.request.query_params.get("product_id")
         if product_id:
             queryset = queryset.filter(id=product_id)

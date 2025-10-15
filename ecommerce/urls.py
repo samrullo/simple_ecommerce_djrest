@@ -54,6 +54,7 @@ from .viewsets.product.viewsets import (
     ProductViewSet,
     ProductWeightViewSet,
     ProductWithIconImageListView,
+ProductWithIconImagePaginatedListView,
     ProductWithImageListView,
     TagViewSet,
     WishlistViewSet,
@@ -135,6 +136,9 @@ urlpatterns = [
         ),
         name="products-with-icon-image",
     ),
+    path("v1/products-with-icon-image-paginated/",
+         cache_control(no_cache=True)(cache_page(60*15)(ProductWithIconImagePaginatedListView.as_view())),
+         name="products-with-icon-image-paginated"),
     path(
         "v1/minimal-products/",
         ProductMinimalListView.as_view(),
