@@ -73,16 +73,16 @@ DEBUG = True
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,simple-ecommerce-djrest").split(
     ","
 ) + [
-    "localhost",
-    "simple-ecommerce-djrest.onrender.com",
-    "simple-ecommerce-front.onrender.com",
-]
+                    "localhost",
+                    "simple-ecommerce-djrest.onrender.com",
+                    "simple-ecommerce-front.onrender.com",
+                ]
 CSRF_TRUSTED_ORIGINS = os.getenv(
     "CSRF_TRUSTED_ORIGINS",
     "https://simple-ecommerce-djrest.onrender.com,http://localhost:3000",
 ).split(",") + [
-    "https://simple-ecommerce-djrest.onrender.com",
-]
+                           "https://simple-ecommerce-djrest.onrender.com",
+                       ]
 
 # At the bottom of your settings.py file (after INSTALLED_APPS, etc.)
 # DJ_REST_AUTH = {
@@ -213,6 +213,10 @@ db_host_type = os.environ.get("DB_HOST_TYPE", "LOCAL")
 default_dbconfig = local_dbconfig if db_host_type == "LOCAL" else postgres_dbconfig
 
 DATABASES = {"default": default_dbconfig}
+
+# if this is production environment set https
+if db_host_type != "LOCAL":
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
