@@ -18,6 +18,10 @@ User=get_user_model()
 inventories = Inventory.objects.all()
 print(f"inventories : {len(inventories)}")
 
-product = Product.objects.get(pk=2)
-pimage = ProductImage.objects.filter(product=product).first()
+product_id=815
+product = Product.objects.get(pk=product_id)
+product_prices=product.price.all()
+product_images=product.images.all()
+pimage = product.images.first()
+print(f"Product {product} has {len(product_prices)} prices and {len(product_images)} images")
 print(f"product image name : {pimage.image}")

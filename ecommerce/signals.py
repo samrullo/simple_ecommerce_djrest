@@ -10,13 +10,17 @@ from ecommerce.models import Inventory, Product, ProductInventory
 logger = logging.getLogger(__name__)
 
 
-@receiver([post_save, post_delete], sender=Inventory)
+@receiver([post_save], sender=Inventory)
 def update_product_inventory(sender, instance, **kwargs):
+    # if product is being deleted then no need to update total inventory
+    product = instance.product
+    if not Product.objects.filter(pk=product.pk).exists():
+        return
     total = (
-        Inventory.objects.filter(product=instance.product).aggregate(
-            total=Sum("stock")
-        )["total"]
-        or 0
+            Inventory.objects.filter(product=instance.product).aggregate(
+                total=Sum("stock")
+            )["total"]
+            or 0
     )
 
     ProductInventory.objects.update_or_create(
